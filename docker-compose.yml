@@ -1,0 +1,20 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: habit-tracker-mongodb
+    restart: unless-stopped
+
+    command:
+      - mongod
+      - --replSet
+      - rs0
+      - --bind_ip_all
+
+    ports:
+      - "27017:27017"
+
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
