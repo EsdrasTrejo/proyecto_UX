@@ -44,18 +44,21 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
+const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcrypt"));
 const users_service_1 = require("../users/users.service");
 let AuthService = class AuthService {
     usersService;
-    constructor(usersService) {
+    jwtService;
+    constructor(usersService, jwtService) {
         this.usersService = usersService;
+        this.jwtService = jwtService;
     }
     async register(registerDto) {
         const { name, email, password } = registerDto;
         const existingUser = await this.usersService.findByEmail(email);
         if (existingUser) {
-            throw new common_1.ConflictException('Ya existe un usuario con este correo electrónico');
+            throw new common_1.ConflictException('Ya existe un usuario con este correo');
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await this.usersService.create(name, email, hashedPassword);
@@ -65,14 +68,34 @@ let AuthService = class AuthService {
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                createdAt: user.createdAt,
             },
+        };
+    }
+    async login(loginDto) {
+        const { email, password } = loginDto;
+        const user = await this.usersService.findByEmail(email);
+        if (!user) {
+            throw new common_1.UnauthorizedException('Correo o contraseña incorrectos');
+        }
+        const passwordCorrecta = await bcrypt.compare(password, user.password);
+        if (!passwordCorrecta) {
+            throw new common_1.UnauthorizedException('Correo o contraseña incorrectos');
+        }
+        const payload = {
+            sub: user.id,
+            email: user.email,
+        };
+        const accessToken = await this.jwtService.signAsync(payload);
+        return {
+            message: 'Inicio de sesión exitoso',
+            access_token: accessToken,
         };
     }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [users_service_1.UsersService])
+    __metadata("design:paramtypes", [users_service_1.UsersService,
+        jwt_1.JwtService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map
