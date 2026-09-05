@@ -18,6 +18,7 @@ const auth_guard_1 = require("../auth/auth.guard");
 const habits_service_1 = require("./habits.service");
 const create_habit_dto_1 = require("./dto/create-habit.dto");
 const update_habit_dto_1 = require("./dto/update-habit.dto");
+const mark_habit_dto_1 = require("./dto/mark-habit.dto");
 let HabitsController = class HabitsController {
     habitsService;
     constructor(habitsService) {
@@ -37,6 +38,15 @@ let HabitsController = class HabitsController {
     }
     remove(id, request) {
         return this.habitsService.remove(id, request.user.sub);
+    }
+    markToday(id, request, markHabitDto) {
+        return this.habitsService.markToday(id, request.user.sub, markHabitDto);
+    }
+    findRecords(id, request) {
+        return this.habitsService.findRecords(id, request.user.sub);
+    }
+    findToday(request) {
+        return this.habitsService.findToday(request.user.sub);
     }
 };
 exports.HabitsController = HabitsController;
@@ -80,6 +90,30 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], HabitsController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Put)(':id/records/today'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, mark_habit_dto_1.MarkHabitDto]),
+    __metadata("design:returntype", void 0)
+], HabitsController.prototype, "markToday", null);
+__decorate([
+    (0, common_1.Get)(':id/records'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], HabitsController.prototype, "findRecords", null);
+__decorate([
+    (0, common_1.Get)('today'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], HabitsController.prototype, "findToday", null);
 exports.HabitsController = HabitsController = __decorate([
     (0, common_1.Controller)('habits'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),

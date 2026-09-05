@@ -2,14 +2,18 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
   IconButton,
   InputAdornment,
   Link as MuiLink,
+  Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
@@ -27,9 +31,16 @@ import {
   RegisterFormData,
 } from '@/schemas/register.schema';
 
+import { registerUser } from '@/services/auth.service';
+
 export default function RegisterForm() {
+  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const {
     register,
@@ -41,6 +52,7 @@ export default function RegisterForm() {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     mode: 'onBlur',
+
     defaultValues: {
       name: '',
       email: '',
@@ -50,152 +62,221 @@ export default function RegisterForm() {
   });
 
   const onSubmit = async (data: RegisterFormData) => {
-    console.log('Datos del formulario:', data);
+    setErrorMessage('');
+    setSuccessMessage('');
 
-    // Solo para comprobar temporalmente el estado de carga.
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      await registerUser({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
+
+      setSuccessMessage('Cuenta creada correctamente');
+
+      setTimeout(() => {
+        router.push('/login');
+      }, 1200);
+    } catch (error) {
+      console.error('Error al registrar usuario:', error);
+
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.message;
+
+        if (Array.isArray(message)) {
+          setErrorMessage(message.join(', '));
+        } else if (typeof message === 'string') {
+          setErrorMessage(message);
+        } else {
+          setErrorMessage(
+            'No se pudo crear la cuenta. Inténtalo nuevamente.',
+          );
+        }
+      } else {
+        setErrorMessage(
+          'Ocurrió un error inesperado. Inténtalo nuevamente.',
+        );
+      }
+    }
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit(onSubmit)}
-      noValidate
-      sx={{
-        width: '100%',
-      }}
-    >
+    <>
       <Box
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2.5,
+          width: '100%',
         }}
       >
-        <TextField
-          label="Nombre completo"
-          placeholder="Ej. Juan Pérez"
-          fullWidth
-          autoComplete="name"
-          error={Boolean(errors.name)}
-          helperText={errors.name?.message}
-          {...register('name')}
-        />
-
-        <TextField
-          label="Correo electrónico"
-          placeholder="ejemplo@correo.com"
-          type="email"
-          fullWidth
-          autoComplete="email"
-          error={Boolean(errors.email)}
-          helperText={errors.email?.message}
-          {...register('email')}
-        />
-
-        <TextField
-          label="Contraseña"
-          placeholder="Mínimo 6 caracteres"
-          type={showPassword ? 'text' : 'password'}
-          fullWidth
-          autoComplete="new-password"
-          error={Boolean(errors.password)}
-          helperText={errors.password?.message}
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    edge="end"
-                    aria-label={
-                      showPassword
-                        ? 'Ocultar contraseña'
-                        : 'Mostrar contraseña'
-                    }
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
-          {...register('password')}
-        />
-
-        <TextField
-          label="Confirmar contraseña"
-          placeholder="Repite tu contraseña"
-          type={showConfirmPassword ? 'text' : 'password'}
-          fullWidth
-          autoComplete="new-password"
-          error={Boolean(errors.confirmPassword)}
-          helperText={errors.confirmPassword?.message}
-          {...register('confirmPassword')}
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() =>
-                      setShowConfirmPassword((prev) => !prev)
-                    }
-                    edge="end"
-                    aria-label={
-                      showConfirmPassword
-                        ? 'Ocultar contraseña'
-                        : 'Mostrar contraseña'
-                    }
-                  >
-                    {showConfirmPassword ? (
-                      <VisibilityOff />
-                    ) : (
-                      <Visibility />
-                    )}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
-        />
-
-        <Button
-          type="submit"
-          variant="contained"
-          size="large"
-          fullWidth
-          disabled={isSubmitting}
+        <Box
           sx={{
-            mt: 1,
-            height: 48,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2.5,
           }}
         >
-          {isSubmitting ? (
-            <CircularProgress
-              size={24}
-              color="inherit"
-            />
-          ) : (
-            'Crear cuenta'
-          )}
-        </Button>
+          <TextField
+            label="Nombre completo"
+            placeholder="Ej. Juan Pérez"
+            fullWidth
+            autoComplete="name"
+            error={Boolean(errors.name)}
+            helperText={errors.name?.message}
+            disabled={isSubmitting}
+            {...register('name')}
+          />
 
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ textAlign: 'center' }}
-        >
-          ¿Ya tienes una cuenta?{' '}
-          <MuiLink
-            component={Link}
-            href="/login"
-            underline="hover"
-            sx={{ fontWeight: 600 }}
+          <TextField
+            label="Correo electrónico"
+            placeholder="ejemplo@correo.com"
+            type="email"
+            fullWidth
+            autoComplete="email"
+            error={Boolean(errors.email)}
+            helperText={errors.email?.message}
+            disabled={isSubmitting}
+            {...register('email')}
+          />
+
+          <TextField
+            label="Contraseña"
+            placeholder="Mínimo 6 caracteres"
+            type={showPassword ? 'text' : 'password'}
+            fullWidth
+            autoComplete="new-password"
+            error={Boolean(errors.password)}
+            helperText={errors.password?.message}
+            disabled={isSubmitting}
+            {...register('password')}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() =>
+                        setShowPassword((previous) => !previous)
+                      }
+                      edge="end"
+                      aria-label={
+                        showPassword
+                          ? 'Ocultar contraseña'
+                          : 'Mostrar contraseña'
+                      }
+                    >
+                      {showPassword ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+
+          <TextField
+            label="Confirmar contraseña"
+            placeholder="Repite tu contraseña"
+            type={showConfirmPassword ? 'text' : 'password'}
+            fullWidth
+            autoComplete="new-password"
+            error={Boolean(errors.confirmPassword)}
+            helperText={errors.confirmPassword?.message}
+            disabled={isSubmitting}
+            {...register('confirmPassword')}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() =>
+                        setShowConfirmPassword(
+                          (previous) => !previous,
+                        )
+                      }
+                      edge="end"
+                      aria-label={
+                        showConfirmPassword
+                          ? 'Ocultar contraseña'
+                          : 'Mostrar contraseña'
+                      }
+                    >
+                      {showConfirmPassword ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+
+          {errorMessage && (
+            <Alert severity="error">
+              {errorMessage}
+            </Alert>
+          )}
+
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            fullWidth
+            disabled={isSubmitting}
+            sx={{
+              mt: 1,
+              height: 48,
+            }}
           >
-            Iniciar sesión
-          </MuiLink>
-        </Typography>
+            {isSubmitting ? (
+              <CircularProgress
+                size={24}
+                color="inherit"
+              />
+            ) : (
+              'Crear cuenta'
+            )}
+          </Button>
+
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ textAlign: 'center' }}
+          >
+            ¿Ya tienes una cuenta?{' '}
+            <MuiLink
+              component={Link}
+              href="/login"
+              underline="hover"
+              sx={{ fontWeight: 600 }}
+            >
+              Iniciar sesión
+            </MuiLink>
+          </Typography>
+        </Box>
       </Box>
-    </Box>
+
+      <Snackbar
+        open={Boolean(successMessage)}
+        autoHideDuration={2000}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+      >
+        <Alert
+          severity="success"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }

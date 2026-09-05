@@ -11,9 +11,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateHabitDto = void 0;
 const class_validator_1 = require("class-validator");
+const client_1 = require("@prisma/client");
 class CreateHabitDto {
     name;
     description;
+    category;
+    frequency;
+    weeklyDay;
+    customDays;
+    priority;
+    startDate;
+    endDate;
 }
 exports.CreateHabitDto = CreateHabitDto;
 __decorate([
@@ -26,4 +34,38 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateHabitDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateHabitDto.prototype, "category", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(client_1.HabitFrequency),
+    __metadata("design:type", String)
+], CreateHabitDto.prototype, "frequency", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.HabitDay),
+    __metadata("design:type", String)
+], CreateHabitDto.prototype, "weeklyDay", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayUnique)(),
+    (0, class_validator_1.IsEnum)(client_1.HabitDay, { each: true }),
+    __metadata("design:type", Array)
+], CreateHabitDto.prototype, "customDays", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(client_1.HabitPriority),
+    __metadata("design:type", String)
+], CreateHabitDto.prototype, "priority", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateHabitDto.prototype, "startDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateHabitDto.prototype, "endDate", void 0);
 //# sourceMappingURL=create-habit.dto.js.map

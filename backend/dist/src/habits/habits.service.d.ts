@@ -1,4 +1,5 @@
 import { PrismaService } from '../prisma/prisma.service';
+import { MarkHabitDto } from './dto/mark-habit.dto';
 import { CreateHabitDto } from './dto/create-habit.dto';
 import { UpdateHabitDto } from './dto/update-habit.dto';
 export declare class HabitsService {
@@ -10,16 +11,31 @@ export declare class HabitsService {
         createdAt: Date;
         updatedAt: Date;
         description: string | null;
-        completed: boolean;
+        category: string | null;
+        frequency: import("@prisma/client").$Enums.HabitFrequency;
+        weeklyDay: import("@prisma/client").$Enums.HabitDay | null;
+        customDays: import("@prisma/client").$Enums.HabitDay[];
+        priority: import("@prisma/client").$Enums.HabitPriority;
+        startDate: Date;
+        endDate: Date | null;
+        active: boolean;
         userId: string;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    private normalizeFrequency;
     findAll(userId: string): import("@prisma/client").Prisma.PrismaPromise<{
         id: string;
         name: string;
         createdAt: Date;
         updatedAt: Date;
         description: string | null;
-        completed: boolean;
+        category: string | null;
+        frequency: import("@prisma/client").$Enums.HabitFrequency;
+        weeklyDay: import("@prisma/client").$Enums.HabitDay | null;
+        customDays: import("@prisma/client").$Enums.HabitDay[];
+        priority: import("@prisma/client").$Enums.HabitPriority;
+        startDate: Date;
+        endDate: Date | null;
+        active: boolean;
         userId: string;
     }[]>;
     findOne(id: string, userId: string): Promise<{
@@ -28,8 +44,24 @@ export declare class HabitsService {
         createdAt: Date;
         updatedAt: Date;
         description: string | null;
+        category: string | null;
+        frequency: import("@prisma/client").$Enums.HabitFrequency;
+        weeklyDay: import("@prisma/client").$Enums.HabitDay | null;
+        customDays: import("@prisma/client").$Enums.HabitDay[];
+        priority: import("@prisma/client").$Enums.HabitPriority;
+        startDate: Date;
+        endDate: Date | null;
+        active: boolean;
+        userId: string;
+    }>;
+    markToday(id: string, userId: string, markHabitDto: MarkHabitDto): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
         completed: boolean;
         userId: string;
+        date: Date;
+        habitId: string;
     }>;
     update(id: string, userId: string, updateHabitDto: UpdateHabitDto): Promise<{
         id: string;
@@ -37,10 +69,44 @@ export declare class HabitsService {
         createdAt: Date;
         updatedAt: Date;
         description: string | null;
-        completed: boolean;
+        category: string | null;
+        frequency: import("@prisma/client").$Enums.HabitFrequency;
+        weeklyDay: import("@prisma/client").$Enums.HabitDay | null;
+        customDays: import("@prisma/client").$Enums.HabitDay[];
+        priority: import("@prisma/client").$Enums.HabitPriority;
+        startDate: Date;
+        endDate: Date | null;
+        active: boolean;
         userId: string;
     }>;
+    findRecords(id: string, userId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        completed: boolean;
+        userId: string;
+        date: Date;
+        habitId: string;
+    }[]>;
     remove(id: string, userId: string): Promise<{
         message: string;
     }>;
+    private getHabitDay;
+    findToday(userId: string): Promise<{
+        completedToday: boolean;
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        description: string | null;
+        category: string | null;
+        frequency: import("@prisma/client").$Enums.HabitFrequency;
+        weeklyDay: import("@prisma/client").$Enums.HabitDay | null;
+        customDays: import("@prisma/client").$Enums.HabitDay[];
+        priority: import("@prisma/client").$Enums.HabitPriority;
+        startDate: Date;
+        endDate: Date | null;
+        active: boolean;
+        userId: string;
+    }[]>;
 }

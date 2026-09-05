@@ -11,10 +11,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateHabitDto = void 0;
 const class_validator_1 = require("class-validator");
+const client_1 = require("@prisma/client");
 class UpdateHabitDto {
     name;
     description;
-    completed;
+    category;
+    frequency;
+    weeklyDay;
+    customDays;
+    priority;
+    startDate;
+    endDate;
+    active;
 }
 exports.UpdateHabitDto = UpdateHabitDto;
 __decorate([
@@ -30,7 +38,44 @@ __decorate([
 ], UpdateHabitDto.prototype, "description", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateHabitDto.prototype, "category", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.HabitFrequency),
+    __metadata("design:type", String)
+], UpdateHabitDto.prototype, "frequency", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.HabitDay),
+    __metadata("design:type", String)
+], UpdateHabitDto.prototype, "weeklyDay", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayUnique)(),
+    (0, class_validator_1.IsEnum)(client_1.HabitDay, { each: true }),
+    __metadata("design:type", Array)
+], UpdateHabitDto.prototype, "customDays", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.HabitPriority),
+    __metadata("design:type", String)
+], UpdateHabitDto.prototype, "priority", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], UpdateHabitDto.prototype, "startDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], UpdateHabitDto.prototype, "endDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
-], UpdateHabitDto.prototype, "completed", void 0);
+], UpdateHabitDto.prototype, "active", void 0);
 //# sourceMappingURL=update-habit.dto.js.map
