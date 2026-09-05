@@ -1,5 +1,15 @@
 import api from './api';
 
+export type HabitFrequency =
+  | 'DAILY'
+  | 'WEEKLY'
+  | 'CUSTOM';
+
+export type HabitPriority =
+  | 'LOW'
+  | 'MEDIUM'
+  | 'HIGH';
+
 export type HabitDay =
   | 'MONDAY'
   | 'TUESDAY'
@@ -17,15 +27,14 @@ export interface Habit {
   description?: string | null;
   category?: string | null;
 
-  frequency: string;
+  frequency: HabitFrequency;
 
   weeklyDay?: HabitDay | null;
-
   customDays?: HabitDay[];
 
-  priority?: string | null;
+  priority: HabitPriority;
 
-  startDate?: string | null;
+  startDate: string;
   endDate?: string | null;
 
   active: boolean;
@@ -36,37 +45,57 @@ export interface CreateHabitData {
   description?: string;
   category?: string;
 
-  frequency:
-    | 'DAILY'
-    | 'WEEKLY'
-    | 'CUSTOM';
+  frequency: HabitFrequency;
 
   weeklyDay?: HabitDay;
-
   customDays?: HabitDay[];
 
-  priority:
-    | 'LOW'
-    | 'MEDIUM'
-    | 'HIGH';
+  priority: HabitPriority;
 
   startDate: string;
   endDate?: string;
 }
 
-export const getHabits = async (): Promise<Habit[]> => {
-  const response = await api.get<Habit[]>('/habits');
+export type UpdateHabitData =
+  Partial<CreateHabitData>;
 
-  return response.data;
-};
+export const getHabits =
+  async (): Promise<Habit[]> => {
+    const response =
+      await api.get<Habit[]>('/habits');
+
+    return response.data;
+  };
+
+export const getHabitById =
+  async (id: string): Promise<Habit> => {
+    const response =
+      await api.get<Habit>(`/habits/${id}`);
+
+    return response.data;
+  };
 
 export const createHabit = async (
   data: CreateHabitData,
 ): Promise<Habit> => {
-  const response = await api.post<Habit>(
-    '/habits',
-    data,
-  );
+  const response =
+    await api.post<Habit>(
+      '/habits',
+      data,
+    );
+
+  return response.data;
+};
+
+export const updateHabit = async (
+  id: string,
+  data: UpdateHabitData,
+): Promise<Habit> => {
+  const response =
+    await api.patch<Habit>(
+      `/habits/${id}`,
+      data,
+    );
 
   return response.data;
 };

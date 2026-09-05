@@ -29,7 +29,11 @@ import {
   HabitFormData,
 } from '@/schemas/habit.schema';
 
-import { createHabit } from '@/services/habits.service';
+import {
+  createHabit,
+  HabitDay,
+  updateHabit,
+} from '@/services/habits.service';
 const DAYS = [
   {
     value: 'MONDAY',
@@ -60,8 +64,17 @@ const DAYS = [
     label: 'Dom',
   },
 ] as const;
+interface HabitFormProps {
+  mode?: 'create' | 'edit';
+  habitId?: string;
+  initialValues?: Partial<HabitFormData>;
+}
 
-export default function HabitForm() {
+export default function HabitForm({
+  mode = 'create',
+  habitId,
+  initialValues,
+}: HabitFormProps)  {
   const router = useRouter();
 
   const [errorMessage, setErrorMessage] = useState('');
@@ -82,15 +95,32 @@ export default function HabitForm() {
     resolver: zodResolver(habitSchema),
 
    defaultValues: {
-  name: '',
-  description: '',
-  category: '',
-  frequency: 'DAILY',
-  weeklyDay: undefined,
-  customDays: [],
-  priority: 'MEDIUM',
-  startDate: '',
-  endDate: '',
+  name:
+    initialValues?.name ?? '',
+
+  description:
+    initialValues?.description ?? '',
+
+  category:
+    initialValues?.category ?? '',
+
+  frequency:
+    initialValues?.frequency ?? 'DAILY',
+
+  weeklyDay:
+    initialValues?.weeklyDay,
+
+  customDays:
+    initialValues?.customDays ?? [],
+
+  priority:
+    initialValues?.priority ?? 'MEDIUM',
+
+  startDate:
+    initialValues?.startDate ?? '',
+
+  endDate:
+    initialValues?.endDate ?? '',
 },
   });
   const selectedFrequency = watch('frequency');
@@ -126,87 +156,123 @@ export default function HabitForm() {
 ]);
 
   const onSubmit = async (
-    data: HabitFormData,
-  ) => {
-    setErrorMessage('');
-    setSuccessMessage('');
+  data: HabitFormData,
+) => {
+  setErrorMessage('');
+  setSuccessMessage('');
 
-    try {
-        console.log('DATOS DEL FORMULARIO:', data);
-      await createHabit({
-  name: data.name.trim(),
+  const habitData = {
+    name: data.name.trim(),
 
-  description:
-    data.description?.trim() || undefined,
+    description:
+      data.description?.trim() ||
+      undefined,
 
-  category:
-    data.category?.trim() || undefined,
+    category:
+      data.category?.trim() ||
+      undefined,
 
-  frequency: data.frequency,
+    frequency: data.frequency,
 
-  weeklyDay:
-    data.frequency === 'WEEKLY'
-      ? data.weeklyDay
-      : undefined,
+    weeklyDay:
+      data.frequency === 'WEEKLY'
+        ? data.weeklyDay
+        : undefined,
 
-  customDays:
-    data.frequency === 'CUSTOM'
-      ? data.customDays
-      : undefined,
+    customDays:
+      data.frequency === 'CUSTOM'
+        ? data.customDays
+        : undefined,
 
-  priority: data.priority,
+    priority: data.priority,
 
-  startDate: data.startDate,
+    startDate: data.startDate,
 
-  endDate:
-    data.endDate || undefined,
-});
+    endDate:
+      data.endDate || undefined,
+  };
+
+  try {
+    if (mode === 'edit') {
+      if (!habitId) {
+        setErrorMessage(
+          'No se pudo identificar el hábito.',
+        );
+        return;
+      }
+
+      await updateHabit(
+        habitId,
+        habitData,
+      );
+
+      setSuccessMessage(
+        'Hábito actualizado correctamente',
+      );
+    } else {
+      await createHabit(habitData);
 
       setSuccessMessage(
         'Hábito creado correctamente',
       );
+    }
 
-      setTimeout(() => {
-        router.push('/habits');
-      }, 1000);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-  console.log('STATUS:', error.response?.status);
-  console.log('RESPUESTA BACKEND:', error.response?.data);
-}
+    setTimeout(() => {
+      router.push('/habits');
+    }, 1000);
+  } catch (error) {
+    console.error(
+      mode === 'edit'
+        ? 'Error al actualizar hábito:'
+        : 'Error al crear hábito:',
+      error,
+    );
 
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message =
-          error.response?.data?.message;
+    if (axios.isAxiosError(error)) {
+      const status =
+        error.response?.status;
 
-        if (status === 401) {
-          localStorage.removeItem(
-            'access_token',
-          );
+      const message =
+        error.response?.data?.message;
 
-          router.replace('/login');
-          return;
-        }
+      if (status === 401) {
+        localStorage.removeItem(
+          'access_token',
+        );
 
-        if (Array.isArray(message)) {
-          setErrorMessage(
-            message.join(', '),
-          );
-          return;
-        }
-
-        if (typeof message === 'string') {
-          setErrorMessage(message);
-          return;
-        }
+        router.replace('/login');
+        return;
       }
 
-      setErrorMessage(
-        'No se pudo crear el hábito. Inténtalo nuevamente.',
-      );
+      if (status === 404) {
+        setErrorMessage(
+          'El hábito no existe o ya fue eliminado.',
+        );
+        return;
+      }
+
+      if (Array.isArray(message)) {
+        setErrorMessage(
+          message.join(', '),
+        );
+        return;
+      }
+
+      if (
+        typeof message === 'string'
+      ) {
+        setErrorMessage(message);
+        return;
+      }
     }
-  };
+
+    setErrorMessage(
+      mode === 'edit'
+        ? 'No se pudo actualizar el hábito. Inténtalo nuevamente.'
+        : 'No se pudo crear el hábito. Inténtalo nuevamente.',
+    );
+  }
+};
 
   return (
     <>
@@ -507,13 +573,15 @@ export default function HabitForm() {
               }}
             >
               {isSubmitting ? (
-                <CircularProgress
-                  size={24}
-                  color="inherit"
-                />
-              ) : (
-                'Crear hábito'
-              )}
+  <CircularProgress
+    size={24}
+    color="inherit"
+  />
+) : mode === 'edit' ? (
+  'Guardar cambios'
+) : (
+  'Crear hábito'
+)}
             </Button>
           </Stack>
         </Stack>
