@@ -12,5 +12,5 @@ export class UpdateHabitDto {
 
   @IsOptional()
   @IsBoolean()
-  completed?: boolean;
+  active?: boolean;
 }
