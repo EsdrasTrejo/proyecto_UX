@@ -11,18 +11,26 @@ import {
   Button,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Paper,
+  Snackbar,
   Stack,
   Typography,
 } from '@mui/material';
 
 import {
   Add,
+  DeleteOutlined,
   EditOutlined,
   Refresh,
 } from '@mui/icons-material';
 
 import {
+  deleteHabit,
   getHabits,
   Habit,
 } from '@/services/habits.service';
@@ -67,6 +75,20 @@ export default function HabitsPage() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [
+  habitToDelete,
+  setHabitToDelete,
+] = useState<Habit | null>(null);
+
+const [
+  deleting,
+  setDeleting,
+] = useState(false);
+
+const [
+  successMessage,
+  setSuccessMessage,
+] = useState('');
 
   const loadHabits = useCallback(async () => {
     setLoading(true);
@@ -99,6 +121,88 @@ export default function HabitsPage() {
       setLoading(false);
     }
   }, [router]);
+  const handleDelete = async () => {
+  if (!habitToDelete) {
+    return;
+  }
+
+  const habitId =
+    habitToDelete.id ??
+    habitToDelete._id;
+
+  if (!habitId) {
+    setErrorMessage(
+      'No se pudo identificar el hábito.',
+    );
+
+    setHabitToDelete(null);
+    return;
+  }
+
+  try {
+    setDeleting(true);
+    setErrorMessage('');
+
+    await deleteHabit(habitId);
+
+    setHabits((currentHabits) =>
+      currentHabits.filter(
+        (habit) =>
+          (habit.id ?? habit._id) !==
+          habitId,
+      ),
+    );
+
+    setSuccessMessage(
+      'Hábito eliminado correctamente',
+    );
+
+    setHabitToDelete(null);
+  } catch (error) {
+    console.error(
+      'Error al eliminar hábito:',
+      error,
+    );
+
+    if (axios.isAxiosError(error)) {
+      if (
+        error.response?.status === 401
+      ) {
+        localStorage.removeItem(
+          'access_token',
+        );
+
+        router.replace('/login');
+        return;
+      }
+
+      if (
+        error.response?.status === 404
+      ) {
+        setErrorMessage(
+          'El hábito ya no existe.',
+        );
+
+        setHabitToDelete(null);
+        return;
+      }
+
+      const message =
+        error.response?.data?.message;
+
+      if (typeof message === 'string') {
+        setErrorMessage(message);
+        return;
+      }
+    }
+
+    setErrorMessage(
+      'No se pudo eliminar el hábito. Inténtalo nuevamente.',
+    );
+  } finally {
+    setDeleting(false);
+  }
+};
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -363,27 +467,124 @@ export default function HabitsPage() {
                   </Box>
 
                   {realHabitId && (
-                    <Box
-                      sx={{
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Button
-                        component={Link}
-                        href={`/habits/${realHabitId}/edit`}
-                        variant="outlined"
-                        startIcon={<EditOutlined />}
-                      >
-                        Editar
-                      </Button>
-                    </Box>
-                  )}
+  <Stack
+    direction={{
+      xs: 'column',
+      sm: 'row',
+    }}
+    spacing={1}
+    sx={{
+      flexShrink: 0,
+    }}
+  >
+    <Button
+      component={Link}
+      href={`/habits/${realHabitId}/edit`}
+      variant="outlined"
+      startIcon={<EditOutlined />}
+    >
+      Editar
+    </Button>
+
+    <Button
+      variant="outlined"
+      color="error"
+      startIcon={<DeleteOutlined />}
+      onClick={() =>
+        setHabitToDelete(habit)
+      }
+    >
+      Eliminar
+    </Button>
+  </Stack>
+  
+)}
                 </Stack>
               </Paper>
             );
           })}
         </Stack>
       )}
+      <Dialog
+  open={Boolean(habitToDelete)}
+  onClose={() => {
+    if (!deleting) {
+      setHabitToDelete(null);
+    }
+  }}
+>
+  <DialogTitle>
+    ¿Eliminar hábito?
+  </DialogTitle>
+
+  <DialogContent>
+    <DialogContentText>
+      {habitToDelete
+        ? `Vas a eliminar "${habitToDelete.name}". Esta acción no se puede deshacer.`
+        : ''}
+    </DialogContentText>
+  </DialogContent>
+
+  <DialogActions
+    sx={{
+      px: 3,
+      pb: 2,
+    }}
+  >
+    <Button
+      onClick={() =>
+        setHabitToDelete(null)
+      }
+      disabled={deleting}
+    >
+      Cancelar
+    </Button>
+
+    <Button
+      color="error"
+      variant="contained"
+      onClick={handleDelete}
+      disabled={deleting}
+      startIcon={
+        deleting
+          ? undefined
+          : <DeleteOutlined />
+      }
+    >
+      {deleting ? (
+        <CircularProgress
+          size={22}
+          color="inherit"
+        />
+      ) : (
+        'Eliminar'
+      )}
+    </Button>
+  </DialogActions>
+</Dialog>
+
+<Snackbar
+  open={Boolean(successMessage)}
+  autoHideDuration={2500}
+  onClose={() =>
+    setSuccessMessage('')
+  }
+  anchorOrigin={{
+    vertical: 'bottom',
+    horizontal: 'center',
+  }}
+>
+  <Alert
+    severity="success"
+    variant="filled"
+    onClose={() =>
+      setSuccessMessage('')
+    }
+  >
+    {successMessage}
+  </Alert>
+</Snackbar>
+
     </Box>
   );
 }

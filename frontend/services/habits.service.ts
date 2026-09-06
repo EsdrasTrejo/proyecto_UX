@@ -99,3 +99,9 @@ export const updateHabit = async (
 
   return response.data;
 };
+
+export const deleteHabit = async (
+  id: string,
+): Promise<void> => {
+  await api.delete(`/habits/${id}`);
+};
