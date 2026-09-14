@@ -21,6 +21,8 @@ import {
   Typography,
 } from '@mui/material';
 
+import { authStorage } from '@/services/auth-storage';
+
 import {
   Add,
   CalendarMonthOutlined,
@@ -80,9 +82,7 @@ export default function DashboardPage() {
           axios.isAxiosError(error) &&
           error.response?.status === 401
         ) {
-          localStorage.removeItem(
-            'access_token',
-          );
+          authStorage.removeToken();
 
           router.replace('/login');
           return;

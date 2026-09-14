@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 import {
   Alert,
@@ -20,31 +20,29 @@ import {
   Snackbar,
   Stack,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
 import {
   Add,
   DeleteOutlined,
   EditOutlined,
   Refresh,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
-import {
-  deleteHabit,
-  getHabits,
-  Habit,
-} from '@/services/habits.service';
+import { deleteHabit, getHabits, Habit } from "@/services/habits.service";
+
+import { authStorage } from "@/services/auth-storage";
 
 function getFrequencyLabel(frequency: string) {
   const values: Record<string, string> = {
-    DAILY: 'Diario',
-    daily: 'Diario',
+    DAILY: "Diario",
+    daily: "Diario",
 
-    WEEKLY: 'Semanal',
-    weekly: 'Semanal',
+    WEEKLY: "Semanal",
+    weekly: "Semanal",
 
-    CUSTOM: 'Personalizada',
-    custom: 'Personalizada',
+    CUSTOM: "Personalizada",
+    custom: "Personalizada",
   };
 
   return values[frequency] ?? frequency;
@@ -56,14 +54,14 @@ function getPriorityLabel(priority?: string | null) {
   }
 
   const values: Record<string, string> = {
-    HIGH: 'Alta',
-    high: 'Alta',
+    HIGH: "Alta",
+    high: "Alta",
 
-    MEDIUM: 'Media',
-    medium: 'Media',
+    MEDIUM: "Media",
+    medium: "Media",
 
-    LOW: 'Baja',
-    low: 'Baja',
+    LOW: "Baja",
+    low: "Baja",
   };
 
   return values[priority] ?? priority;
@@ -74,135 +72,96 @@ export default function HabitsPage() {
 
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [
-  habitToDelete,
-  setHabitToDelete,
-] = useState<Habit | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [habitToDelete, setHabitToDelete] = useState<Habit | null>(null);
 
-const [
-  deleting,
-  setDeleting,
-] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-const [
-  successMessage,
-  setSuccessMessage,
-] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
 
   const loadHabits = useCallback(async () => {
     setLoading(true);
-    setErrorMessage('');
+    setErrorMessage("");
 
     try {
       const data = await getHabits();
 
       setHabits(data);
     } catch (error) {
-      console.error(
-        'Error al cargar hábitos:',
-        error,
-      );
+      console.error("Error al cargar hábitos:", error);
 
-      if (
-        axios.isAxiosError(error) &&
-        error.response?.status === 401
-      ) {
-        localStorage.removeItem('access_token');
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStorage.removeToken();
 
-        router.replace('/login');
+        router.replace("/login");
         return;
       }
 
       setErrorMessage(
-        'No se pudieron cargar tus hábitos. Inténtalo nuevamente.',
+        "No se pudieron cargar tus hábitos. Inténtalo nuevamente.",
       );
     } finally {
       setLoading(false);
     }
   }, [router]);
   const handleDelete = async () => {
-  if (!habitToDelete) {
-    return;
-  }
-
-  const habitId =
-    habitToDelete.id ??
-    habitToDelete._id;
-
-  if (!habitId) {
-    setErrorMessage(
-      'No se pudo identificar el hábito.',
-    );
-
-    setHabitToDelete(null);
-    return;
-  }
-
-  try {
-    setDeleting(true);
-    setErrorMessage('');
-
-    await deleteHabit(habitId);
-
-    setHabits((currentHabits) =>
-      currentHabits.filter(
-        (habit) =>
-          (habit.id ?? habit._id) !==
-          habitId,
-      ),
-    );
-
-    setSuccessMessage(
-      'Hábito eliminado correctamente',
-    );
-
-    setHabitToDelete(null);
-  } catch (error) {
-    console.error(
-      'Error al eliminar hábito:',
-      error,
-    );
-
-    if (axios.isAxiosError(error)) {
-      if (
-        error.response?.status === 401
-      ) {
-        localStorage.removeItem(
-          'access_token',
-        );
-
-        router.replace('/login');
-        return;
-      }
-
-      if (
-        error.response?.status === 404
-      ) {
-        setErrorMessage(
-          'El hábito ya no existe.',
-        );
-
-        setHabitToDelete(null);
-        return;
-      }
-
-      const message =
-        error.response?.data?.message;
-
-      if (typeof message === 'string') {
-        setErrorMessage(message);
-        return;
-      }
+    if (!habitToDelete) {
+      return;
     }
 
-    setErrorMessage(
-      'No se pudo eliminar el hábito. Inténtalo nuevamente.',
-    );
-  } finally {
-    setDeleting(false);
-  }
-};
+    const habitId = habitToDelete.id ?? habitToDelete._id;
+
+    if (!habitId) {
+      setErrorMessage("No se pudo identificar el hábito.");
+
+      setHabitToDelete(null);
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setErrorMessage("");
+
+      await deleteHabit(habitId);
+
+      setHabits((currentHabits) =>
+        currentHabits.filter((habit) => (habit.id ?? habit._id) !== habitId),
+      );
+
+      setSuccessMessage("Hábito eliminado correctamente");
+
+      setHabitToDelete(null);
+    } catch (error) {
+      console.error("Error al eliminar hábito:", error);
+
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          authStorage.removeToken();
+
+          router.replace("/login");
+          return;
+        }
+
+        if (error.response?.status === 404) {
+          setErrorMessage("El hábito ya no existe.");
+
+          setHabitToDelete(null);
+          return;
+        }
+
+        const message = error.response?.data?.message;
+
+        if (typeof message === "string") {
+          setErrorMessage(message);
+          return;
+        }
+      }
+
+      setErrorMessage("No se pudo eliminar el hábito. Inténtalo nuevamente.");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -216,16 +175,16 @@ const [
     <Box>
       <Stack
         direction={{
-          xs: 'column',
-          sm: 'row',
+          xs: "column",
+          sm: "row",
         }}
         spacing={2}
         sx={{
           mb: 4,
-          justifyContent: 'space-between',
+          justifyContent: "space-between",
           alignItems: {
-            xs: 'stretch',
-            sm: 'center',
+            xs: "stretch",
+            sm: "center",
           },
         }}
       >
@@ -285,9 +244,9 @@ const [
         <Box
           sx={{
             minHeight: 250,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <CircularProgress />
@@ -301,10 +260,10 @@ const [
               sm: 6,
             },
 
-            border: '1px dashed',
-            borderColor: 'divider',
+            border: "1px dashed",
+            borderColor: "divider",
             borderRadius: 3,
-            textAlign: 'center',
+            textAlign: "center",
           }}
         >
           <Typography
@@ -338,13 +297,9 @@ const [
       ) : (
         <Stack spacing={2}>
           {habits.map((habit) => {
-            const habitId =
-              habit.id ??
-              habit._id ??
-              habit.name;
+            const habitId = habit.id ?? habit._id ?? habit.name;
 
-            const realHabitId =
-              habit.id ?? habit._id;
+            const realHabitId = habit.id ?? habit._id;
 
             return (
               <Paper
@@ -356,26 +311,25 @@ const [
                     sm: 3,
                   },
 
-                  border: '1px solid',
-                  borderColor: 'divider',
+                  border: "1px solid",
+                  borderColor: "divider",
                   borderRadius: 3,
 
-                  transition:
-                    'border-color 0.2s ease',
+                  transition: "border-color 0.2s ease",
 
-                  '&:hover': {
-                    borderColor: 'primary.main',
+                  "&:hover": {
+                    borderColor: "primary.main",
                   },
                 }}
               >
                 <Stack
                   direction={{
-                    xs: 'column',
-                    sm: 'row',
+                    xs: "column",
+                    sm: "row",
                   }}
                   spacing={2}
                   sx={{
-                    justifyContent: 'space-between',
+                    justifyContent: "space-between",
                   }}
                 >
                   <Box
@@ -389,8 +343,8 @@ const [
                       useFlexGap
                       sx={{
                         mb: 1,
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
+                        alignItems: "center",
+                        flexWrap: "wrap",
                       }}
                     >
                       <Typography
@@ -403,16 +357,8 @@ const [
                       </Typography>
 
                       <Chip
-                        label={
-                          habit.active
-                            ? 'Activo'
-                            : 'Inactivo'
-                        }
-                        color={
-                          habit.active
-                            ? 'success'
-                            : 'default'
-                        }
+                        label={habit.active ? "Activo" : "Inactivo"}
+                        color={habit.active ? "success" : "default"}
                         size="small"
                       />
                     </Stack>
@@ -433,13 +379,11 @@ const [
                       spacing={1}
                       useFlexGap
                       sx={{
-                        flexWrap: 'wrap',
+                        flexWrap: "wrap",
                       }}
                     >
                       <Chip
-                        label={getFrequencyLabel(
-                          habit.frequency,
-                        )}
+                        label={getFrequencyLabel(habit.frequency)}
                         variant="outlined"
                         size="small"
                       />
@@ -454,11 +398,9 @@ const [
 
                       {habit.priority && (
                         <Chip
-                          label={`Prioridad: ${
-                            getPriorityLabel(
-                              habit.priority,
-                            )
-                          }`}
+                          label={`Prioridad: ${getPriorityLabel(
+                            habit.priority,
+                          )}`}
                           variant="outlined"
                           size="small"
                         />
@@ -467,38 +409,35 @@ const [
                   </Box>
 
                   {realHabitId && (
-  <Stack
-    direction={{
-      xs: 'column',
-      sm: 'row',
-    }}
-    spacing={1}
-    sx={{
-      flexShrink: 0,
-    }}
-  >
-    <Button
-      component={Link}
-      href={`/habits/${realHabitId}/edit`}
-      variant="outlined"
-      startIcon={<EditOutlined />}
-    >
-      Editar
-    </Button>
+                    <Stack
+                      direction={{
+                        xs: "column",
+                        sm: "row",
+                      }}
+                      spacing={1}
+                      sx={{
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Button
+                        component={Link}
+                        href={`/habits/${realHabitId}/edit`}
+                        variant="outlined"
+                        startIcon={<EditOutlined />}
+                      >
+                        Editar
+                      </Button>
 
-    <Button
-      variant="outlined"
-      color="error"
-      startIcon={<DeleteOutlined />}
-      onClick={() =>
-        setHabitToDelete(habit)
-      }
-    >
-      Eliminar
-    </Button>
-  </Stack>
-  
-)}
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        startIcon={<DeleteOutlined />}
+                        onClick={() => setHabitToDelete(habit)}
+                      >
+                        Eliminar
+                      </Button>
+                    </Stack>
+                  )}
                 </Stack>
               </Paper>
             );
@@ -506,85 +445,66 @@ const [
         </Stack>
       )}
       <Dialog
-  open={Boolean(habitToDelete)}
-  onClose={() => {
-    if (!deleting) {
-      setHabitToDelete(null);
-    }
-  }}
->
-  <DialogTitle>
-    ¿Eliminar hábito?
-  </DialogTitle>
+        open={Boolean(habitToDelete)}
+        onClose={() => {
+          if (!deleting) {
+            setHabitToDelete(null);
+          }
+        }}
+      >
+        <DialogTitle>¿Eliminar hábito?</DialogTitle>
 
-  <DialogContent>
-    <DialogContentText>
-      {habitToDelete
-        ? `Vas a eliminar "${habitToDelete.name}". Esta acción no se puede deshacer.`
-        : ''}
-    </DialogContentText>
-  </DialogContent>
+        <DialogContent>
+          <DialogContentText>
+            {habitToDelete
+              ? `Vas a eliminar "${habitToDelete.name}". Esta acción no se puede deshacer.`
+              : ""}
+          </DialogContentText>
+        </DialogContent>
 
-  <DialogActions
-    sx={{
-      px: 3,
-      pb: 2,
-    }}
-  >
-    <Button
-      onClick={() =>
-        setHabitToDelete(null)
-      }
-      disabled={deleting}
-    >
-      Cancelar
-    </Button>
+        <DialogActions
+          sx={{
+            px: 3,
+            pb: 2,
+          }}
+        >
+          <Button onClick={() => setHabitToDelete(null)} disabled={deleting}>
+            Cancelar
+          </Button>
 
-    <Button
-      color="error"
-      variant="contained"
-      onClick={handleDelete}
-      disabled={deleting}
-      startIcon={
-        deleting
-          ? undefined
-          : <DeleteOutlined />
-      }
-    >
-      {deleting ? (
-        <CircularProgress
-          size={22}
-          color="inherit"
-        />
-      ) : (
-        'Eliminar'
-      )}
-    </Button>
-  </DialogActions>
-</Dialog>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={handleDelete}
+            disabled={deleting}
+            startIcon={deleting ? undefined : <DeleteOutlined />}
+          >
+            {deleting ? (
+              <CircularProgress size={22} color="inherit" />
+            ) : (
+              "Eliminar"
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-<Snackbar
-  open={Boolean(successMessage)}
-  autoHideDuration={2500}
-  onClose={() =>
-    setSuccessMessage('')
-  }
-  anchorOrigin={{
-    vertical: 'bottom',
-    horizontal: 'center',
-  }}
->
-  <Alert
-    severity="success"
-    variant="filled"
-    onClose={() =>
-      setSuccessMessage('')
-    }
-  >
-    {successMessage}
-  </Alert>
-</Snackbar>
-
+      <Snackbar
+        open={Boolean(successMessage)}
+        autoHideDuration={2500}
+        onClose={() => setSuccessMessage("")}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+      >
+        <Alert
+          severity="success"
+          variant="filled"
+          onClose={() => setSuccessMessage("")}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

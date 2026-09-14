@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 import {
   Alert,
@@ -14,48 +14,40 @@ import {
   Link as MuiLink,
   TextField,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
-import {
-  Visibility,
-  VisibilityOff,
-} from '@mui/icons-material';
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import {
-  loginSchema,
-  LoginFormData,
-} from '@/schemas/login.schema';
+import { loginSchema, LoginFormData } from "@/schemas/login.schema";
 
-import { loginUser } from '@/services/auth.service';
+import { loginUser } from "@/services/auth.service";
+import { authStorage } from "@/services/auth-storage";
 
 export default function LoginForm() {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   const {
     register,
     handleSubmit,
-    formState: {
-      errors,
-      isSubmitting,
-    },
+    formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    mode: 'onBlur',
+    mode: "onBlur",
 
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    setErrorMessage('');
+    setErrorMessage("");
 
     try {
       const result = await loginUser({
@@ -63,46 +55,37 @@ export default function LoginForm() {
         password: data.password,
       });
 
-      localStorage.setItem(
-        'access_token',
-        result.access_token,
-      );
+      authStorage.setToken(result.access_token);
 
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (error) {
-      console.error('Error al iniciar sesión:', error);
+      console.error("Error al iniciar sesión:", error);
 
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
         const message = error.response?.data?.message;
 
         if (status === 401) {
-          setErrorMessage(
-            'Correo electrónico o contraseña incorrectos.',
-          );
+          setErrorMessage("Correo electrónico o contraseña incorrectos.");
           return;
         }
 
         if (Array.isArray(message)) {
-          setErrorMessage(message.join(', '));
+          setErrorMessage(message.join(", "));
           return;
         }
 
-        if (typeof message === 'string') {
+        if (typeof message === "string") {
           setErrorMessage(message);
           return;
         }
 
-        setErrorMessage(
-          'No se pudo iniciar sesión. Inténtalo nuevamente.',
-        );
+        setErrorMessage("No se pudo iniciar sesión. Inténtalo nuevamente.");
 
         return;
       }
 
-      setErrorMessage(
-        'Ocurrió un error inesperado. Inténtalo nuevamente.',
-      );
+      setErrorMessage("Ocurrió un error inesperado. Inténtalo nuevamente.");
     }
   };
 
@@ -112,13 +95,13 @@ export default function LoginForm() {
       onSubmit={handleSubmit(onSubmit)}
       noValidate
       sx={{
-        width: '100%',
+        width: "100%",
       }}
     >
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
+          display: "flex",
+          flexDirection: "column",
           gap: 2.5,
         }}
       >
@@ -131,41 +114,31 @@ export default function LoginForm() {
           error={Boolean(errors.email)}
           helperText={errors.email?.message}
           disabled={isSubmitting}
-          {...register('email')}
+          {...register("email")}
         />
 
         <TextField
           label="Contraseña"
           placeholder="Ingresa tu contraseña"
-          type={showPassword ? 'text' : 'password'}
+          type={showPassword ? "text" : "password"}
           fullWidth
           autoComplete="current-password"
           error={Boolean(errors.password)}
           helperText={errors.password?.message}
           disabled={isSubmitting}
-          {...register('password')}
+          {...register("password")}
           slotProps={{
             input: {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    onClick={() =>
-                      setShowPassword(
-                        (previous) => !previous,
-                      )
-                    }
+                    onClick={() => setShowPassword((previous) => !previous)}
                     edge="end"
                     aria-label={
-                      showPassword
-                        ? 'Ocultar contraseña'
-                        : 'Mostrar contraseña'
+                      showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
                     }
                   >
-                    {showPassword ? (
-                      <VisibilityOff />
-                    ) : (
-                      <Visibility />
-                    )}
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -173,11 +146,7 @@ export default function LoginForm() {
           }}
         />
 
-        {errorMessage && (
-          <Alert severity="error">
-            {errorMessage}
-          </Alert>
-        )}
+        {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
 
         <Button
           type="submit"
@@ -191,26 +160,19 @@ export default function LoginForm() {
           }}
         >
           {isSubmitting ? (
-            <CircularProgress
-              size={24}
-              color="inherit"
-            />
+            <CircularProgress size={24} color="inherit" />
           ) : (
-            'Iniciar sesión'
+            "Iniciar sesión"
           )}
         </Button>
 
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ textAlign: 'center' }}
+          sx={{ textAlign: "center" }}
         >
-          ¿No tienes una cuenta?{' '}
-          <MuiLink
-            href="/register"
-            underline="hover"
-            sx={{ fontWeight: 600 }}
-          >
+          ¿No tienes una cuenta?{" "}
+          <MuiLink href="/register" underline="hover" sx={{ fontWeight: 600 }}>
             Crear cuenta
           </MuiLink>
         </Typography>

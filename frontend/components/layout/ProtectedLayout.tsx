@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { ReactNode, useEffect, useState } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { ReactNode, useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 
 import {
   AppBar,
@@ -17,16 +17,17 @@ import {
   ListItemText,
   Toolbar,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
 import {
   DashboardOutlined,
   Logout,
   Menu,
   TaskAltOutlined,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 const drawerWidth = 240;
+import { authStorage } from "@/services/auth-storage";
 
 interface ProtectedLayoutProps {
   children: ReactNode;
@@ -34,20 +35,18 @@ interface ProtectedLayoutProps {
 
 const navigationItems = [
   {
-    label: 'Dashboard',
-    href: '/dashboard',
+    label: "Dashboard",
+    href: "/dashboard",
     icon: <DashboardOutlined />,
   },
   {
-    label: 'Hábitos',
-    href: '/habits',
+    label: "Hábitos",
+    href: "/habits",
     icon: <TaskAltOutlined />,
   },
 ];
 
-export default function ProtectedLayout({
-  children,
-}: ProtectedLayoutProps) {
+export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -55,10 +54,10 @@ export default function ProtectedLayout({
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
+    const token = authStorage.getToken();
 
     if (!token) {
-      router.replace('/login');
+      router.replace("/login");
       return;
     }
 
@@ -74,17 +73,17 @@ export default function ProtectedLayout({
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token');
+    authStorage.removeToken();
 
-    router.replace('/login');
+    router.replace("/login");
   };
 
   const drawerContent = (
     <Box
       sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <Toolbar
@@ -98,11 +97,11 @@ export default function ProtectedLayout({
             width: 38,
             height: 38,
             borderRadius: 2,
-            bgcolor: 'primary.light',
-            color: 'primary.main',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            bgcolor: "primary.light",
+            color: "primary.main",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             fontWeight: 800,
           }}
         >
@@ -129,8 +128,7 @@ export default function ProtectedLayout({
       >
         {navigationItems.map((item) => {
           const isSelected =
-            pathname === item.href ||
-            pathname.startsWith(`${item.href}/`);
+            pathname === item.href || pathname.startsWith(`${item.href}/`);
 
           return (
             <ListItemButton
@@ -147,17 +145,13 @@ export default function ProtectedLayout({
               <ListItemIcon
                 sx={{
                   minWidth: 42,
-                  color: isSelected
-                    ? 'primary.main'
-                    : 'text.secondary',
+                  color: isSelected ? "primary.main" : "text.secondary",
                 }}
               >
                 {item.icon}
               </ListItemIcon>
 
-              <ListItemText
-                primary={item.label}
-              />
+              <ListItemText primary={item.label} />
             </ListItemButton>
           );
         })}
@@ -182,7 +176,7 @@ export default function ProtectedLayout({
           <ListItemIcon
             sx={{
               minWidth: 42,
-              color: 'text.secondary',
+              color: "text.secondary",
             }}
           >
             <Logout />
@@ -198,10 +192,10 @@ export default function ProtectedLayout({
     return (
       <Box
         sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <CircularProgress />
@@ -212,9 +206,9 @@ export default function ProtectedLayout({
   return (
     <Box
       sx={{
-        display: 'flex',
-        minHeight: '100vh',
-        bgcolor: 'background.default',
+        display: "flex",
+        minHeight: "100vh",
+        bgcolor: "background.default",
       }}
     >
       <AppBar
@@ -222,8 +216,8 @@ export default function ProtectedLayout({
         color="inherit"
         elevation={0}
         sx={{
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          borderBottom: "1px solid",
+          borderColor: "divider",
 
           width: {
             md: `calc(100% - ${drawerWidth}px)`,
@@ -242,7 +236,7 @@ export default function ProtectedLayout({
             sx={{
               mr: 2,
               display: {
-                md: 'none',
+                md: "none",
               },
             }}
             aria-label="Abrir menú"
@@ -250,11 +244,7 @@ export default function ProtectedLayout({
             <Menu />
           </IconButton>
 
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{ fontWeight: 600 }}
-          >
+          <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
             Habit Forge
           </Typography>
         </Toolbar>
@@ -280,13 +270,13 @@ export default function ProtectedLayout({
           }}
           sx={{
             display: {
-              xs: 'block',
-              md: 'none',
+              xs: "block",
+              md: "none",
             },
 
-            '& .MuiDrawer-paper': {
+            "& .MuiDrawer-paper": {
               width: drawerWidth,
-              boxSizing: 'border-box',
+              boxSizing: "border-box",
             },
           }}
         >
@@ -298,13 +288,13 @@ export default function ProtectedLayout({
           open
           sx={{
             display: {
-              xs: 'none',
-              md: 'block',
+              xs: "none",
+              md: "block",
             },
 
-            '& .MuiDrawer-paper': {
+            "& .MuiDrawer-paper": {
               width: drawerWidth,
-              boxSizing: 'border-box',
+              boxSizing: "border-box",
             },
           }}
         >

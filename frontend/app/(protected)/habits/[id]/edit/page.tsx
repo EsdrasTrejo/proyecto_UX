@@ -7,6 +7,8 @@ import {
 
 import Link from 'next/link';
 
+import { authStorage } from '@/services/auth-storage';
+
 import {
   useParams,
   useRouter,
@@ -74,9 +76,7 @@ export default function EditHabitPage() {
             error.response?.status ===
             401
           ) {
-            localStorage.removeItem(
-              'access_token',
-            );
+              authStorage.removeToken();
 
             router.replace('/login');
             return;

@@ -21,6 +21,8 @@ ToggleButton,
 ToggleButtonGroup,
 } from '@mui/material';
 
+import { authStorage } from '@/services/auth-storage';
+
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -236,9 +238,7 @@ export default function HabitForm({
         error.response?.data?.message;
 
       if (status === 401) {
-        localStorage.removeItem(
-          'access_token',
-        );
+        authStorage.removeToken();
 
         router.replace('/login');
         return;
