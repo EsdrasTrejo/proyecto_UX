@@ -121,18 +121,55 @@ export class HabitsService {
   }
 
   async markToday(id: string, userId: string, markHabitDto: MarkHabitDto) {
-    // Comprobamos primero que el hábito
-    // realmente pertenece al usuario
-    await this.findOne(id, userId);
+    const habit = await this.findOne(id, userId);
 
     const now = new Date();
 
-    // Guardamos únicamente el día.
-    // Esto evita crear varios registros
-    // diferentes para el mismo hábito el mismo día.
     const today = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
     );
+
+    const todayDay = this.getHabitDay(now.getDay());
+
+    // Comprobar si el hábito está activo
+    if (!habit.active) {
+      throw new BadRequestException('No puedes completar un hábito inactivo');
+    }
+
+    // Comprobar fecha de inicio
+    if (habit.startDate > today) {
+      throw new BadRequestException('Este hábito todavía no ha iniciado');
+    }
+
+    // Comprobar fecha de finalización
+    if (habit.endDate && habit.endDate < today) {
+      throw new BadRequestException('Este hábito ya finalizó');
+    }
+
+    // Verificar si corresponde al día actual
+    let correspondsToday = false;
+
+    if (habit.frequency === HabitFrequency.DAILY) {
+      correspondsToday = true;
+    }
+
+    if (
+      habit.frequency === HabitFrequency.WEEKLY &&
+      habit.weeklyDay === todayDay
+    ) {
+      correspondsToday = true;
+    }
+
+    if (
+      habit.frequency === HabitFrequency.CUSTOM &&
+      habit.customDays.includes(todayDay)
+    ) {
+      correspondsToday = true;
+    }
+
+    if (!correspondsToday) {
+      throw new BadRequestException('Este hábito no corresponde al día de hoy');
+    }
 
     return this.prisma.habitRecord.upsert({
       where: {
