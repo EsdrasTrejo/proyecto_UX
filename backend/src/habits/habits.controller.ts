@@ -17,6 +17,7 @@ import { HabitsService } from './habits.service';
 import { CreateHabitDto } from './dto/create-habit.dto';
 import { UpdateHabitDto } from './dto/update-habit.dto';
 import { MarkHabitDto } from './dto/mark-habit.dto';
+import { MongoIdPipe } from '../common/pipes/mongo-id.pipe';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -44,35 +45,63 @@ export class HabitsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Req() request: AuthenticatedRequest) {
+  findOne(
+    @Param('id', MongoIdPipe)
+    id: string,
+
+    @Req()
+    request: AuthenticatedRequest,
+  ) {
     return this.habitsService.findOne(id, request.user.sub);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
-    @Req() request: AuthenticatedRequest,
-    @Body() updateHabitDto: UpdateHabitDto,
+    @Param('id', MongoIdPipe)
+    id: string,
+
+    @Req()
+    request: AuthenticatedRequest,
+
+    @Body()
+    updateHabitDto: UpdateHabitDto,
   ) {
     return this.habitsService.update(id, request.user.sub, updateHabitDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Req() request: AuthenticatedRequest) {
+  remove(
+    @Param('id', MongoIdPipe)
+    id: string,
+
+    @Req()
+    request: AuthenticatedRequest,
+  ) {
     return this.habitsService.remove(id, request.user.sub);
   }
 
   @Put(':id/records/today')
   markToday(
-    @Param('id') id: string,
-    @Req() request: AuthenticatedRequest,
-    @Body() markHabitDto: MarkHabitDto,
+    @Param('id', MongoIdPipe)
+    id: string,
+
+    @Req()
+    request: AuthenticatedRequest,
+
+    @Body()
+    markHabitDto: MarkHabitDto,
   ) {
     return this.habitsService.markToday(id, request.user.sub, markHabitDto);
   }
 
   @Get(':id/records')
-  findRecords(@Param('id') id: string, @Req() request: AuthenticatedRequest) {
+  findRecords(
+    @Param('id', MongoIdPipe)
+    id: string,
+
+    @Req()
+    request: AuthenticatedRequest,
+  ) {
     return this.habitsService.findRecords(id, request.user.sub);
   }
   @Get('today')
