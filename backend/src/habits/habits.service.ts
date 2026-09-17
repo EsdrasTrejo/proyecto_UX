@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { MarkHabitDto } from './dto/mark-habit.dto';
 import { CreateHabitDto } from './dto/create-habit.dto';
 import { UpdateHabitDto } from './dto/update-habit.dto';
+import { getHabitDay, getToday } from '../common/date.utils';
 
 @Injectable()
 export class HabitsService {
@@ -123,13 +124,9 @@ export class HabitsService {
   async markToday(id: string, userId: string, markHabitDto: MarkHabitDto) {
     const habit = await this.findOne(id, userId);
 
-    const now = new Date();
+    const today = getToday();
 
-    const today = new Date(
-      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
-    );
-
-    const todayDay = this.getHabitDay(now.getDay());
+    const todayDay = getHabitDay(today);
 
     // Comprobar si el hábito está activo
     if (!habit.active) {
@@ -274,28 +271,10 @@ export class HabitsService {
     };
   }
 
-  private getHabitDay(day: number): HabitDay {
-    const days: HabitDay[] = [
-      HabitDay.SUNDAY,
-      HabitDay.MONDAY,
-      HabitDay.TUESDAY,
-      HabitDay.WEDNESDAY,
-      HabitDay.THURSDAY,
-      HabitDay.FRIDAY,
-      HabitDay.SATURDAY,
-    ];
-
-    return days[day];
-  }
-
   async findToday(userId: string) {
-    const now = new Date();
+    const today = getToday();
 
-    const todayDay = this.getHabitDay(now.getDay());
-
-    const today = new Date(
-      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
-    );
+    const todayDay = getHabitDay(today);
 
     const habits = await this.prisma.habit.findMany({
       where: {

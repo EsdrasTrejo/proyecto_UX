@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { HabitDay, HabitFrequency } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { getHabitDay, getToday, normalizeDate } from '../common/date.utils';
 
 type HabitForStatistics = {
   id: string;
@@ -35,20 +36,6 @@ type ProgressDay = {
 export class StatisticsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private getHabitDay(date: Date): HabitDay {
-    const days: HabitDay[] = [
-      HabitDay.SUNDAY,
-      HabitDay.MONDAY,
-      HabitDay.TUESDAY,
-      HabitDay.WEDNESDAY,
-      HabitDay.THURSDAY,
-      HabitDay.FRIDAY,
-      HabitDay.SATURDAY,
-    ];
-
-    return days[date.getDay()];
-  }
-
   async getSummary(userId: string) {
     const now = new Date();
 
@@ -56,7 +43,7 @@ export class StatisticsService {
       Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
     );
 
-    const todayDay = this.getHabitDay(now);
+    const todayDay = getHabitDay(now);
 
     // Total de hábitos del usuario
     const totalHabits = await this.prisma.habit.count({
@@ -180,18 +167,13 @@ export class StatisticsService {
       completionPercentage,
     };
   }
-  private startOfDay(date: Date) {
-    return new Date(
-      Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
-    );
-  }
 
   private isHabitScheduledForDate(habit: HabitForStatistics, date: Date) {
-    const day = this.startOfDay(date);
+    const day = normalizeDate(date);
 
-    const startDate = this.startOfDay(habit.startDate);
+    const startDate = normalizeDate(habit.startDate);
 
-    const endDate = habit.endDate ? this.startOfDay(habit.endDate) : null;
+    const endDate = habit.endDate ? normalizeDate(habit.endDate) : null;
 
     if (day < startDate) {
       return false;
@@ -201,7 +183,7 @@ export class StatisticsService {
       return false;
     }
 
-    const habitDay = this.getHabitDay(date);
+    const habitDay = getHabitDay(day);
 
     if (habit.frequency === HabitFrequency.DAILY) {
       return true;
@@ -219,17 +201,16 @@ export class StatisticsService {
   }
 
   private wasCompleted(habit: HabitForStatistics, date: Date) {
-    const targetDate = this.startOfDay(date).getTime();
+    const targetDate = normalizeDate(date).getTime();
 
     return habit.records.some(
       (record) =>
-        this.startOfDay(record.date).getTime() === targetDate &&
-        record.completed,
+        normalizeDate(record.date).getTime() === targetDate && record.completed,
     );
   }
 
   async getWeeklyProgress(userId: string) {
-    const now = new Date();
+    const now = getToday();
 
     const currentDay = now.getDay();
 
@@ -239,7 +220,7 @@ export class StatisticsService {
 
     startOfWeek.setDate(now.getDate() + differenceToMonday);
 
-    const monday = this.startOfDay(startOfWeek);
+    const monday = normalizeDate(startOfWeek);
 
     const sunday = new Date(monday);
 
@@ -325,7 +306,7 @@ export class StatisticsService {
   }
 
   async getMonthlyProgress(userId: string) {
-    const now = new Date();
+    const now = getToday();
 
     const firstDay = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1));
 
@@ -364,7 +345,7 @@ export class StatisticsService {
 
     for (let day = 1; day <= totalDays; day++) {
       const date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), day));
-      const today = this.startOfDay(now);
+      const today = getToday();
 
       if (date > today) {
         break;
@@ -419,13 +400,13 @@ export class StatisticsService {
   }
 
   private calculateStreak(habit: HabitForStatistics) {
-    const today = this.startOfDay(new Date());
+    const today = getToday();
 
-    const startDate = this.startOfDay(habit.startDate);
+    const startDate = normalizeDate(habit.startDate);
 
     const endDate =
       habit.endDate && habit.endDate < today
-        ? this.startOfDay(habit.endDate)
+        ? normalizeDate(habit.endDate)
         : today;
 
     const scheduledDates: Date[] = [];
@@ -513,7 +494,7 @@ export class StatisticsService {
     };
   }
   async getTrend(userId: string) {
-    const today = this.startOfDay(new Date());
+    const today = getToday();
 
     const startDate = new Date(today);
 

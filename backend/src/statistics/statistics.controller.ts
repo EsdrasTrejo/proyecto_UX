@@ -49,4 +49,11 @@ export class StatisticsController {
   ) {
     return this.statisticsService.getStreaks(request.user.sub);
   }
+  @Get('trend')
+  getTrend(
+    @Req()
+    request: AuthenticatedRequest,
+  ) {
+    return this.statisticsService.getTrend(request.user.sub);
+  }
 }

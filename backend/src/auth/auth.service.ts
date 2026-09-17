@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 
 import { JwtService } from '@nestjs/jwt';
@@ -42,6 +43,22 @@ export class AuthService {
         name: user.name,
         email: user.email,
       },
+    };
+  }
+
+  async getProfile(userId: string) {
+    const user = await this.usersService.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
   }
 

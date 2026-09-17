@@ -38,6 +38,6 @@ export class AuthController {
       };
     },
   ) {
-    return request.user;
+    return this.authService.getProfile(request.user.sub);
   }
 }
