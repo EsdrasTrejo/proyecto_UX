@@ -15,8 +15,6 @@ export declare class HabitsController {
     create(request: AuthenticatedRequest, createHabitDto: CreateHabitDto): import("@prisma/client").Prisma.Prisma__HabitClient<{
         id: string;
         name: string;
-        createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         category: string | null;
         frequency: import("@prisma/client").$Enums.HabitFrequency;
@@ -26,13 +24,13 @@ export declare class HabitsController {
         startDate: Date;
         endDate: Date | null;
         active: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         userId: string;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     findAll(request: AuthenticatedRequest): import("@prisma/client").Prisma.PrismaPromise<{
         id: string;
         name: string;
-        createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         category: string | null;
         frequency: import("@prisma/client").$Enums.HabitFrequency;
@@ -42,13 +40,13 @@ export declare class HabitsController {
         startDate: Date;
         endDate: Date | null;
         active: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         userId: string;
     }[]>;
     findOne(id: string, request: AuthenticatedRequest): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         category: string | null;
         frequency: import("@prisma/client").$Enums.HabitFrequency;
@@ -58,13 +56,13 @@ export declare class HabitsController {
         startDate: Date;
         endDate: Date | null;
         active: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         userId: string;
     }>;
     update(id: string, request: AuthenticatedRequest, updateHabitDto: UpdateHabitDto): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         category: string | null;
         frequency: import("@prisma/client").$Enums.HabitFrequency;
@@ -74,6 +72,8 @@ export declare class HabitsController {
         startDate: Date;
         endDate: Date | null;
         active: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         userId: string;
     }>;
     remove(id: string, request: AuthenticatedRequest): Promise<{
@@ -83,26 +83,24 @@ export declare class HabitsController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        completed: boolean;
         userId: string;
         date: Date;
+        completed: boolean;
         habitId: string;
     }>;
     findRecords(id: string, request: AuthenticatedRequest): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        completed: boolean;
         userId: string;
         date: Date;
+        completed: boolean;
         habitId: string;
     }[]>;
     findToday(request: AuthenticatedRequest): Promise<{
         completedToday: boolean;
         id: string;
         name: string;
-        createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         category: string | null;
         frequency: import("@prisma/client").$Enums.HabitFrequency;
@@ -112,6 +110,8 @@ export declare class HabitsController {
         startDate: Date;
         endDate: Date | null;
         active: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         userId: string;
     }[]>;
 }

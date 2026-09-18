@@ -14,6 +14,13 @@ export declare class AuthService {
             email: string;
         };
     }>;
+    getProfile(userId: string): Promise<{
+        id: string;
+        name: string;
+        email: string;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
     login(loginDto: LoginDto): Promise<{
         message: string;
         access_token: string;

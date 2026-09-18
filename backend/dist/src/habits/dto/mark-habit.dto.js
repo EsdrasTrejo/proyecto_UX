@@ -11,11 +11,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MarkHabitDto = void 0;
 const class_validator_1 = require("class-validator");
+const swagger_1 = require("@nestjs/swagger");
 class MarkHabitDto {
     completed;
 }
 exports.MarkHabitDto = MarkHabitDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        example: true,
+        description: 'Indica si el hábito fue completado en el día actual',
+    }),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], MarkHabitDto.prototype, "completed", void 0);

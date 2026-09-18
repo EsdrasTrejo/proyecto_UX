@@ -71,6 +71,19 @@ let AuthService = class AuthService {
             },
         };
     }
+    async getProfile(userId) {
+        const user = await this.usersService.findById(userId);
+        if (!user) {
+            throw new common_1.NotFoundException('Usuario no encontrado');
+        }
+        return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+        };
+    }
     async login(loginDto) {
         const { email, password } = loginDto;
         const user = await this.usersService.findByEmail(email);

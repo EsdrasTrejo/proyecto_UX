@@ -6,11 +6,9 @@ export declare class HabitsService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     create(userId: string, createHabitDto: CreateHabitDto): import("@prisma/client").Prisma.Prisma__HabitClient<{
+        description: string | null;
         id: string;
         name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string | null;
         category: string | null;
         frequency: import("@prisma/client").$Enums.HabitFrequency;
         weeklyDay: import("@prisma/client").$Enums.HabitDay | null;
@@ -19,15 +17,15 @@ export declare class HabitsService {
         startDate: Date;
         endDate: Date | null;
         active: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         userId: string;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     private normalizeFrequency;
     findAll(userId: string): import("@prisma/client").Prisma.PrismaPromise<{
+        description: string | null;
         id: string;
         name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string | null;
         category: string | null;
         frequency: import("@prisma/client").$Enums.HabitFrequency;
         weeklyDay: import("@prisma/client").$Enums.HabitDay | null;
@@ -36,14 +34,14 @@ export declare class HabitsService {
         startDate: Date;
         endDate: Date | null;
         active: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         userId: string;
     }[]>;
     findOne(id: string, userId: string): Promise<{
+        description: string | null;
         id: string;
         name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string | null;
         category: string | null;
         frequency: import("@prisma/client").$Enums.HabitFrequency;
         weeklyDay: import("@prisma/client").$Enums.HabitDay | null;
@@ -52,23 +50,23 @@ export declare class HabitsService {
         startDate: Date;
         endDate: Date | null;
         active: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         userId: string;
     }>;
     markToday(id: string, userId: string, markHabitDto: MarkHabitDto): Promise<{
+        completed: boolean;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        completed: boolean;
         userId: string;
         date: Date;
         habitId: string;
     }>;
     update(id: string, userId: string, updateHabitDto: UpdateHabitDto): Promise<{
+        description: string | null;
         id: string;
         name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string | null;
         category: string | null;
         frequency: import("@prisma/client").$Enums.HabitFrequency;
         weeklyDay: import("@prisma/client").$Enums.HabitDay | null;
@@ -77,13 +75,15 @@ export declare class HabitsService {
         startDate: Date;
         endDate: Date | null;
         active: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         userId: string;
     }>;
     findRecords(id: string, userId: string): Promise<{
+        completed: boolean;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        completed: boolean;
         userId: string;
         date: Date;
         habitId: string;
@@ -91,14 +91,11 @@ export declare class HabitsService {
     remove(id: string, userId: string): Promise<{
         message: string;
     }>;
-    private getHabitDay;
     findToday(userId: string): Promise<{
         completedToday: boolean;
+        description: string | null;
         id: string;
         name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string | null;
         category: string | null;
         frequency: import("@prisma/client").$Enums.HabitFrequency;
         weeklyDay: import("@prisma/client").$Enums.HabitDay | null;
@@ -107,6 +104,8 @@ export declare class HabitsService {
         startDate: Date;
         endDate: Date | null;
         active: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         userId: string;
     }[]>;
 }

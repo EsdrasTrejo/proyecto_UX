@@ -22,8 +22,11 @@ export declare class AuthController {
             sub: string;
             email: string;
         };
-    }): {
-        sub: string;
+    }): Promise<{
+        id: string;
+        name: string;
         email: string;
-    };
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
 }
