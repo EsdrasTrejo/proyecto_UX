@@ -39,7 +39,6 @@ interface AuthenticatedRequest extends Request {
 @UseGuards(AuthGuard)
 @ApiTags('Habits')
 @ApiBearerAuth()
-@Controller('habits')
 export class HabitsController {
   constructor(private readonly habitsService: HabitsService) {}
 
@@ -77,6 +76,18 @@ export class HabitsController {
   })
   findAll(@Req() request: AuthenticatedRequest) {
     return this.habitsService.findAll(request.user.sub);
+  }
+
+  @Get('today')
+  @ApiOperation({
+    summary: 'Obtener los hábitos programados para hoy',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de hábitos correspondientes al día actual',
+  })
+  findToday(@Req() request: AuthenticatedRequest) {
+    return this.habitsService.findToday(request.user.sub);
   }
 
   @Get(':id')
@@ -210,16 +221,5 @@ export class HabitsController {
     request: AuthenticatedRequest,
   ) {
     return this.habitsService.findRecords(id, request.user.sub);
-  }
-  @Get('today')
-  @ApiOperation({
-    summary: 'Obtener los hábitos programados para hoy',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de hábitos correspondientes al día actual',
-  })
-  findToday(@Req() request: AuthenticatedRequest) {
-    return this.habitsService.findToday(request.user.sub);
   }
 }

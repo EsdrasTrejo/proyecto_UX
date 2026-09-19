@@ -34,6 +34,9 @@ let HabitsController = class HabitsController {
     findAll(request) {
         return this.habitsService.findAll(request.user.sub);
     }
+    findToday(request) {
+        return this.habitsService.findToday(request.user.sub);
+    }
     findOne(id, request) {
         return this.habitsService.findOne(id, request.user.sub);
     }
@@ -48,9 +51,6 @@ let HabitsController = class HabitsController {
     }
     findRecords(id, request) {
         return this.habitsService.findRecords(id, request.user.sub);
-    }
-    findToday(request) {
-        return this.habitsService.findToday(request.user.sub);
     }
 };
 exports.HabitsController = HabitsController;
@@ -92,6 +92,20 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], HabitsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('today'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Obtener los hábitos programados para hoy',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Lista de hábitos correspondientes al día actual',
+    }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], HabitsController.prototype, "findToday", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({
@@ -206,26 +220,11 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], HabitsController.prototype, "findRecords", null);
-__decorate([
-    (0, common_1.Get)('today'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Obtener los hábitos programados para hoy',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Lista de hábitos correspondientes al día actual',
-    }),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], HabitsController.prototype, "findToday", null);
 exports.HabitsController = HabitsController = __decorate([
     (0, common_1.Controller)('habits'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     (0, swagger_1.ApiTags)('Habits'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.Controller)('habits'),
     __metadata("design:paramtypes", [habits_service_1.HabitsService])
 ], HabitsController);
 //# sourceMappingURL=habits.controller.js.map

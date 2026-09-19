@@ -19,6 +19,7 @@ export type HabitDay =
   | 'SATURDAY'
   | 'SUNDAY';
 
+
 export interface Habit {
   id?: string;
   _id?: string;
@@ -38,6 +39,8 @@ export interface Habit {
   endDate?: string | null;
 
   active: boolean;
+
+  completedToday?: boolean;
 }
 
 export interface CreateHabitData {
@@ -63,6 +66,26 @@ export const getHabits =
   async (): Promise<Habit[]> => {
     const response =
       await api.get<Habit[]>('/habits');
+
+    return response.data;
+  };
+
+  export const markHabitToday = async (
+  id: string,
+  completed: boolean,
+): Promise<void> => {
+  await api.put(
+    `/habits/${id}/records/today`,
+    {
+      completed,
+    },
+  );
+};
+
+  export const getTodayHabits =
+  async (): Promise<Habit[]> => {
+    const response =
+      await api.get<Habit[]>('/habits/today');
 
     return response.data;
   };

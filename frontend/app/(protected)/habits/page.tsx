@@ -313,12 +313,14 @@ export default function HabitsPage() {
 
                   border: "1px solid",
                   borderColor: "divider",
+
                   borderRadius: 3,
 
-                  transition: "border-color 0.2s ease",
+                  transition: "all 0.2s ease",
 
                   "&:hover": {
                     borderColor: "primary.main",
+                    boxShadow: "0 4px 14px rgba(0, 0, 0, 0.05)",
                   },
                 }}
               >
@@ -327,24 +329,29 @@ export default function HabitsPage() {
                     xs: "column",
                     sm: "row",
                   }}
-                  spacing={2}
+                  spacing={3}
                   sx={{
                     justifyContent: "space-between",
+                    alignItems: {
+                      xs: "stretch",
+                      sm: "center",
+                    },
                   }}
                 >
                   <Box
                     sx={{
                       minWidth: 0,
+                      flexGrow: 1,
                     }}
                   >
                     <Stack
                       direction="row"
                       spacing={1}
-                      useFlexGap
                       sx={{
                         mb: 1,
                         alignItems: "center",
                         flexWrap: "wrap",
+                        gap: 1,
                       }}
                     >
                       <Typography
@@ -378,9 +385,7 @@ export default function HabitsPage() {
                       direction="row"
                       spacing={1}
                       useFlexGap
-                      sx={{
-                        flexWrap: "wrap",
-                      }}
+                      sx={{ flexWrap: "wrap" }}
                     >
                       <Chip
                         label={getFrequencyLabel(habit.frequency)}
@@ -410,20 +415,39 @@ export default function HabitsPage() {
 
                   {realHabitId && (
                     <Stack
-                      direction={{
-                        xs: "column",
-                        sm: "row",
-                      }}
+                      direction="row"
                       spacing={1}
                       sx={{
                         flexShrink: 0,
+
+                        alignSelf: {
+                          xs: "flex-start",
+                          sm: "center",
+                        },
                       }}
                     >
                       <Button
                         component={Link}
                         href={`/habits/${realHabitId}/edit`}
-                        variant="outlined"
-                        startIcon={<EditOutlined />}
+                        variant="text"
+                        size="small"
+                        startIcon={<EditOutlined fontSize="small" />}
+                        sx={{
+                          minWidth: "auto",
+
+                          px: 1.5,
+                          py: 0.75,
+
+                          borderRadius: 2,
+
+                          fontWeight: 600,
+
+                          color: "primary.main",
+
+                          "&:hover": {
+                            backgroundColor: "primary.light",
+                          },
+                        }}
                       >
                         Editar
                       </Button>
@@ -431,8 +455,19 @@ export default function HabitsPage() {
                       <Button
                         variant="outlined"
                         color="error"
-                        startIcon={<DeleteOutlined />}
+                        size="small"
+                        startIcon={<DeleteOutlined fontSize="small" />}
                         onClick={() => setHabitToDelete(habit)}
+                        sx={{
+                          minWidth: "auto",
+
+                          px: 1.5,
+                          py: 0.75,
+
+                          borderRadius: 2,
+
+                          fontWeight: 600,
+                        }}
                       >
                         Eliminar
                       </Button>
