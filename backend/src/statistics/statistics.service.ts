@@ -210,21 +210,23 @@ export class StatisticsService {
   }
 
   async getWeeklyProgress(userId: string) {
-    const now = getToday();
+    const today = getToday();
 
-    const currentDay = now.getDay();
+    // getToday() devuelve una fecha normalizada en UTC,
+    // así que todo el cálculo debe seguir usando UTC.
+    const currentDay = today.getUTCDay();
 
     const differenceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
 
-    const startOfWeek = new Date(now);
+    const monday = new Date(today);
 
-    startOfWeek.setDate(now.getDate() + differenceToMonday);
+    monday.setUTCDate(today.getUTCDate() + differenceToMonday);
 
-    const monday = normalizeDate(startOfWeek);
+    const normalizedMonday = normalizeDate(monday);
 
-    const sunday = new Date(monday);
+    const sunday = new Date(normalizedMonday);
 
-    sunday.setUTCDate(monday.getUTCDate() + 6);
+    sunday.setUTCDate(normalizedMonday.getUTCDate() + 6);
 
     const habits = await this.prisma.habit.findMany({
       where: {
@@ -235,7 +237,7 @@ export class StatisticsService {
         records: {
           where: {
             date: {
-              gte: monday,
+              gte: normalizedMonday,
               lte: sunday,
             },
           },
@@ -254,9 +256,9 @@ export class StatisticsService {
     let totalCompleted = 0;
 
     for (let i = 0; i < 7; i++) {
-      const date = new Date(monday);
+      const date = new Date(normalizedMonday);
 
-      date.setUTCDate(monday.getUTCDate() + i);
+      date.setUTCDate(normalizedMonday.getUTCDate() + i);
 
       let scheduled = 0;
       let completed = 0;
@@ -271,8 +273,21 @@ export class StatisticsService {
         }
       }
 
-      totalScheduled += scheduled;
-      totalCompleted += completed;
+      /*
+       * Solo contamos en el resumen
+       * los días que ya ocurrieron,
+       * incluyendo hoy.
+       *
+       * Los días futuros siguen apareciendo
+       * en la gráfica como programación,
+       * pero no disminuyen el porcentaje.
+       */
+      const isFutureDate = date.getTime() > today.getTime();
+
+      if (!isFutureDate) {
+        totalScheduled += scheduled;
+        totalCompleted += completed;
+      }
 
       days.push({
         date,
@@ -290,11 +305,10 @@ export class StatisticsService {
         : Math.round((totalCompleted / totalScheduled) * 100);
 
     return {
-      startDate: monday,
+      startDate: normalizedMonday,
       endDate: sunday,
 
       scheduled: totalScheduled,
-
       completed: totalCompleted,
 
       pending: totalScheduled - totalCompleted,
@@ -306,13 +320,15 @@ export class StatisticsService {
   }
 
   async getMonthlyProgress(userId: string) {
-    const now = getToday();
+    const today = getToday();
 
-    const firstDay = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1));
+    const year = today.getUTCFullYear();
 
-    const lastDay = new Date(
-      Date.UTC(now.getFullYear(), now.getMonth() + 1, 0),
-    );
+    const month = today.getUTCMonth();
+
+    const firstDay = new Date(Date.UTC(year, month, 1));
+
+    const lastDay = new Date(Date.UTC(year, month + 1, 0));
 
     const habits = await this.prisma.habit.findMany({
       where: {
@@ -344,10 +360,13 @@ export class StatisticsService {
     const totalDays = lastDay.getUTCDate();
 
     for (let day = 1; day <= totalDays; day++) {
-      const date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), day));
-      const today = getToday();
+      const date = new Date(Date.UTC(year, month, day));
 
-      if (date > today) {
+      /*
+       * El resumen mensual representa
+       * el progreso hasta hoy.
+       */
+      if (date.getTime() > today.getTime()) {
         break;
       }
 
@@ -383,12 +402,10 @@ export class StatisticsService {
         : Math.round((totalCompleted / totalScheduled) * 100);
 
     return {
-      year: now.getFullYear(),
-
-      month: now.getMonth() + 1,
+      year,
+      month: month + 1,
 
       scheduled: totalScheduled,
-
       completed: totalCompleted,
 
       pending: totalScheduled - totalCompleted,

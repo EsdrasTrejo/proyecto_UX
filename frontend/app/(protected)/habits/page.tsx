@@ -27,6 +27,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   Refresh,
+  HistoryOutlined,
 } from "@mui/icons-material";
 
 import { deleteHabit, getHabits, Habit } from "@/services/habits.service";
@@ -426,6 +427,22 @@ export default function HabitsPage() {
                         },
                       }}
                     >
+                      <Button
+                        component={Link}
+                        href={`/habits/${realHabitId}/history`}
+                        variant="text"
+                        size="small"
+                        startIcon={<HistoryOutlined fontSize="small" />}
+                        sx={{
+                          minWidth: "auto",
+                          px: 1.5,
+                          py: 0.75,
+                          borderRadius: 2,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Historial
+                      </Button>
                       <Button
                         component={Link}
                         href={`/habits/${realHabitId}/edit`}

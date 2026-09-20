@@ -3,6 +3,9 @@
 import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import {
+  BarChartOutlined, AccountCircleOutlined,
+} from '@mui/icons-material';
 
 import {
   AppBar,
@@ -43,6 +46,16 @@ const navigationItems = [
     label: "Hábitos",
     href: "/habits",
     icon: <TaskAltOutlined />,
+  },
+  {
+    label: "Estadísticas",
+    href: "/statistics",
+    icon: <BarChartOutlined />,
+  },
+  {
+    label: "Perfil",
+    href: "/profile",
+    icon: <AccountCircleOutlined />,
   },
 ];
 

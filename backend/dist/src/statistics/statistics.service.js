@@ -146,14 +146,14 @@ let StatisticsService = class StatisticsService {
         return habit.records.some((record) => (0, date_utils_1.normalizeDate)(record.date).getTime() === targetDate && record.completed);
     }
     async getWeeklyProgress(userId) {
-        const now = (0, date_utils_1.getToday)();
-        const currentDay = now.getDay();
+        const today = (0, date_utils_1.getToday)();
+        const currentDay = today.getUTCDay();
         const differenceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() + differenceToMonday);
-        const monday = (0, date_utils_1.normalizeDate)(startOfWeek);
-        const sunday = new Date(monday);
-        sunday.setUTCDate(monday.getUTCDate() + 6);
+        const monday = new Date(today);
+        monday.setUTCDate(today.getUTCDate() + differenceToMonday);
+        const normalizedMonday = (0, date_utils_1.normalizeDate)(monday);
+        const sunday = new Date(normalizedMonday);
+        sunday.setUTCDate(normalizedMonday.getUTCDate() + 6);
         const habits = await this.prisma.habit.findMany({
             where: {
                 userId,
@@ -162,7 +162,7 @@ let StatisticsService = class StatisticsService {
                 records: {
                     where: {
                         date: {
-                            gte: monday,
+                            gte: normalizedMonday,
                             lte: sunday,
                         },
                     },
@@ -177,8 +177,8 @@ let StatisticsService = class StatisticsService {
         let totalScheduled = 0;
         let totalCompleted = 0;
         for (let i = 0; i < 7; i++) {
-            const date = new Date(monday);
-            date.setUTCDate(monday.getUTCDate() + i);
+            const date = new Date(normalizedMonday);
+            date.setUTCDate(normalizedMonday.getUTCDate() + i);
             let scheduled = 0;
             let completed = 0;
             for (const habit of habits) {
@@ -189,8 +189,11 @@ let StatisticsService = class StatisticsService {
                     }
                 }
             }
-            totalScheduled += scheduled;
-            totalCompleted += completed;
+            const isFutureDate = date.getTime() > today.getTime();
+            if (!isFutureDate) {
+                totalScheduled += scheduled;
+                totalCompleted += completed;
+            }
             days.push({
                 date,
                 scheduled,
@@ -202,7 +205,7 @@ let StatisticsService = class StatisticsService {
             ? 0
             : Math.round((totalCompleted / totalScheduled) * 100);
         return {
-            startDate: monday,
+            startDate: normalizedMonday,
             endDate: sunday,
             scheduled: totalScheduled,
             completed: totalCompleted,
@@ -212,9 +215,11 @@ let StatisticsService = class StatisticsService {
         };
     }
     async getMonthlyProgress(userId) {
-        const now = (0, date_utils_1.getToday)();
-        const firstDay = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1));
-        const lastDay = new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 0));
+        const today = (0, date_utils_1.getToday)();
+        const year = today.getUTCFullYear();
+        const month = today.getUTCMonth();
+        const firstDay = new Date(Date.UTC(year, month, 1));
+        const lastDay = new Date(Date.UTC(year, month + 1, 0));
         const habits = await this.prisma.habit.findMany({
             where: {
                 userId,
@@ -239,9 +244,8 @@ let StatisticsService = class StatisticsService {
         const days = [];
         const totalDays = lastDay.getUTCDate();
         for (let day = 1; day <= totalDays; day++) {
-            const date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), day));
-            const today = (0, date_utils_1.getToday)();
-            if (date > today) {
+            const date = new Date(Date.UTC(year, month, day));
+            if (date.getTime() > today.getTime()) {
                 break;
             }
             let scheduled = 0;
@@ -267,8 +271,8 @@ let StatisticsService = class StatisticsService {
             ? 0
             : Math.round((totalCompleted / totalScheduled) * 100);
         return {
-            year: now.getFullYear(),
-            month: now.getMonth() + 1,
+            year,
+            month: month + 1,
             scheduled: totalScheduled,
             completed: totalCompleted,
             pending: totalScheduled - totalCompleted,

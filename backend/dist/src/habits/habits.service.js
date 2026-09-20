@@ -184,6 +184,12 @@ let HabitsService = class HabitsService {
     }
     async remove(id, userId) {
         await this.findOne(id, userId);
+        await this.prisma.habitRecord.deleteMany({
+            where: {
+                habitId: id,
+                userId,
+            },
+        });
         await this.prisma.habit.delete({
             where: {
                 id,

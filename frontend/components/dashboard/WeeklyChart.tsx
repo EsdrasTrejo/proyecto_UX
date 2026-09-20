@@ -20,13 +20,11 @@ function formatDay(date: string) {
   return new Intl.DateTimeFormat(
     'es-HN',
     {
-      weekday: 'short',
+      day: '2-digit',
+      timeZone: 'UTC',
     },
-  )
-    .format(new Date(date))
-    .replace('.', '');
+  ).format(new Date(date));
 }
-
 export default function WeeklyChart({
   data,
 }: WeeklyChartProps) {

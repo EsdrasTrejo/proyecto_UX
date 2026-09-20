@@ -128,3 +128,24 @@ export const deleteHabit = async (
 ): Promise<void> => {
   await api.delete(`/habits/${id}`);
 };
+
+export interface HabitRecord {
+  id: string;
+  date: string;
+  completed: boolean;
+  habitId: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const getHabitRecords = async (
+  id: string,
+): Promise<HabitRecord[]> => {
+  const response =
+    await api.get<HabitRecord[]>(
+      `/habits/${id}/records`,
+    );
+
+  return response.data;
+};

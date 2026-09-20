@@ -258,8 +258,19 @@ export class HabitsService {
   }
 
   async remove(id: string, userId: string) {
+    // Verifica que el hábito existe
+    // y pertenece al usuario autenticado
     await this.findOne(id, userId);
 
+    // Elimina primero todos sus registros
+    await this.prisma.habitRecord.deleteMany({
+      where: {
+        habitId: id,
+        userId,
+      },
+    });
+
+    // Después elimina el hábito
     await this.prisma.habit.delete({
       where: {
         id,
