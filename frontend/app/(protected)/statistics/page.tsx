@@ -1,13 +1,9 @@
-'use client';
+"use client";
 
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useState } from "react";
 
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
+
+
 
 import {
   Alert,
@@ -16,9 +12,9 @@ import {
   CircularProgress,
   Stack,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
-import { Refresh } from '@mui/icons-material';
+import { Refresh } from "@mui/icons-material";
 
 import {
   getMonthlyProgress,
@@ -29,83 +25,59 @@ import {
   StreaksResponse,
   TrendResponse,
   WeeklyProgress,
-} from '@/services/statistics.service';
+} from "@/services/statistics.service";
 
-import { authStorage } from '@/services/auth-storage';
 
-import WeeklyChart from '@/components/dashboard/WeeklyChart';
-import TrendChart from '@/components/dashboard/TrendChart';
-import StreakCards from '@/components/dashboard/StreakCards';
+import {
+  getApiErrorMessage,
+} from '@/services/api-error';
 
-import MonthlyChart from '@/components/statistics/MonthlyChart';
+import WeeklyChart from "@/components/dashboard/WeeklyChart";
+import TrendChart from "@/components/dashboard/TrendChart";
+import StreakCards from "@/components/dashboard/StreakCards";
+
+import MonthlyChart from "@/components/statistics/MonthlyChart";
 
 export default function StatisticsPage() {
-  const router = useRouter();
 
-  const [weekly, setWeekly] =
-    useState<WeeklyProgress | null>(null);
 
-  const [monthly, setMonthly] =
-    useState<MonthlyProgress | null>(null);
+  const [weekly, setWeekly] = useState<WeeklyProgress | null>(null);
 
-  const [trend, setTrend] =
-    useState<TrendResponse | null>(null);
+  const [monthly, setMonthly] = useState<MonthlyProgress | null>(null);
 
-  const [streaks, setStreaks] =
-    useState<StreaksResponse | null>(null);
+  const [trend, setTrend] = useState<TrendResponse | null>(null);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [streaks, setStreaks] = useState<StreaksResponse | null>(null);
 
-  const [
-    errorMessage,
-    setErrorMessage,
-  ] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const loadStatistics =
-    useCallback(async () => {
-      try {
-        setLoading(true);
-        setErrorMessage('');
+  const [errorMessage, setErrorMessage] = useState("");
 
-        const [
-          weeklyData,
-          monthlyData,
-          trendData,
-          streakData,
-        ] = await Promise.all([
+  const loadStatistics = useCallback(async () => {
+    try {
+      setLoading(true);
+      setErrorMessage("");
+
+      const [weeklyData, monthlyData, trendData, streakData] =
+        await Promise.all([
           getWeeklyProgress(),
           getMonthlyProgress(),
           getTrend(),
           getStreaks(),
         ]);
 
-        setWeekly(weeklyData);
-        setMonthly(monthlyData);
-        setTrend(trendData);
-        setStreaks(streakData);
-      } catch (error) {
-        console.error(
-          'Error cargando estadísticas:',
-          error,
-        );
+      setWeekly(weeklyData);
+      setMonthly(monthlyData);
+      setTrend(trendData);
+      setStreaks(streakData);
+    } catch (error) {
+      console.error("Error cargando estadísticas:", error);
 
-        if (
-          axios.isAxiosError(error) &&
-          error.response?.status === 401
-        ) {
-          authStorage.removeToken();
-          router.replace('/login');
-          return;
-        }
-
-        setErrorMessage(
-          'No se pudieron cargar las estadísticas.',
-        );
-      } finally {
-        setLoading(false);
-      }
-    }, [router]);
+      setErrorMessage(
+        getApiErrorMessage(error, "No se pudieron cargar las estadísticas."),
+      );
+    } 
+  }, []);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -122,9 +94,9 @@ export default function StatisticsPage() {
       <Box
         sx={{
           minHeight: 400,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
         <CircularProgress />
@@ -135,20 +107,12 @@ export default function StatisticsPage() {
   return (
     <Box>
       <Box sx={{ mb: 4 }}>
-        <Typography
-          variant="h4"
-          component="h1"
-          sx={{ fontWeight: 700 }}
-        >
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
           Estadísticas
         </Typography>
 
-        <Typography
-          color="text.secondary"
-          sx={{ mt: 0.5 }}
-        >
-          Analiza tu constancia y cumplimiento
-          a lo largo del tiempo.
+        <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+          Analiza tu constancia y cumplimiento a lo largo del tiempo.
         </Typography>
       </Box>
 
@@ -172,21 +136,13 @@ export default function StatisticsPage() {
       )}
 
       <Stack spacing={3}>
-        {weekly && (
-          <WeeklyChart data={weekly} />
-        )}
+        {weekly && <WeeklyChart data={weekly} />}
 
-        {monthly && (
-          <MonthlyChart data={monthly} />
-        )}
+        {monthly && <MonthlyChart data={monthly} />}
 
-        {trend && (
-          <TrendChart data={trend} />
-        )}
+        {trend && <TrendChart data={trend} />}
 
-        {streaks && (
-          <StreakCards data={streaks} />
-        )}
+        {streaks && <StreakCards data={streaks} />}
       </Stack>
     </Box>
   );

@@ -1,13 +1,8 @@
-'use client';
+"use client";
 
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useState } from "react";
 
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
+
 
 import {
   Alert,
@@ -19,21 +14,18 @@ import {
   Paper,
   Stack,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
 import {
   CalendarMonthOutlined,
   EmailOutlined,
   PersonOutlined,
   Refresh,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
-import {
-  getProfile,
-  UserProfile,
-} from '@/services/profile.service';
+import { getProfile, UserProfile } from "@/services/profile.service";
+import { getApiErrorMessage } from "@/services/api-error";
 
-import { authStorage } from '@/services/auth-storage';
 
 function getInitials(name: string) {
   return name
@@ -41,83 +33,44 @@ function getInitials(name: string) {
     .split(/\s+/)
     .slice(0, 2)
     .map((word) => word[0])
-    .join('')
+    .join("")
     .toUpperCase();
 }
 
 function formatDate(date: string) {
-  return new Intl.DateTimeFormat(
-    'es-HN',
-    {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    },
-  ).format(new Date(date));
+  return new Intl.DateTimeFormat("es-HN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(date));
 }
 
 export default function ProfilePage() {
-  const router = useRouter();
+  
 
-  const [
-    profile,
-    setProfile,
-  ] = useState<UserProfile | null>(
-    null,
-  );
+  const [profile, setProfile] = useState<UserProfile | null>(null);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [
-    errorMessage,
-    setErrorMessage,
-  ] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const loadProfile =
-    useCallback(async () => {
-      try {
-        setLoading(true);
-        setErrorMessage('');
+  const loadProfile = useCallback(async () => {
+    try {
+      setLoading(true);
+      setErrorMessage("");
 
-        const data =
-          await getProfile();
+      const data = await getProfile();
 
-        setProfile(data);
-      } catch (error) {
-        console.error(
-          'Error cargando perfil:',
-          error,
-        );
-
-        if (
-          axios.isAxiosError(error) &&
-          error.response?.status === 401
-        ) {
-          authStorage.removeToken();
-
-          router.replace('/login');
-          return;
-        }
-
-        if (
-          axios.isAxiosError(error) &&
-          error.response?.status === 404
-        ) {
-          setErrorMessage(
-            'No se encontró el perfil del usuario.',
-          );
-
-          return;
-        }
-
-        setErrorMessage(
-          'No se pudo cargar tu perfil.',
-        );
-      } finally {
-        setLoading(false);
-      }
-    }, [router]);
+      setProfile(data);
+    } catch (error) {
+      console.error("Error cargando perfil:", error);
+      setErrorMessage(
+        getApiErrorMessage(error, "No se pudo cargar tu perfil."),
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -132,9 +85,9 @@ export default function ProfilePage() {
       <Box
         sx={{
           minHeight: 400,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
         <CircularProgress />
@@ -146,22 +99,15 @@ export default function ProfilePage() {
     <Box
       sx={{
         maxWidth: 850,
-        mx: 'auto',
+        mx: "auto",
       }}
     >
       <Box sx={{ mb: 4 }}>
-        <Typography
-          variant="h4"
-          component="h1"
-          sx={{ fontWeight: 700 }}
-        >
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
           Perfil
         </Typography>
 
-        <Typography
-          color="text.secondary"
-          sx={{ mt: 0.5 }}
-        >
+        <Typography color="text.secondary" sx={{ mt: 0.5 }}>
           Información de tu cuenta.
         </Typography>
       </Box>
@@ -189,10 +135,10 @@ export default function ProfilePage() {
         <Paper
           elevation={0}
           sx={{
-            border: '1px solid',
-            borderColor: 'divider',
+            border: "1px solid",
+            borderColor: "divider",
             borderRadius: 3,
-            overflow: 'hidden',
+            overflow: "hidden",
           }}
         >
           <Box
@@ -202,15 +148,15 @@ export default function ProfilePage() {
                 sm: 4,
               },
 
-              display: 'flex',
+              display: "flex",
               flexDirection: {
-                xs: 'column',
-                sm: 'row',
+                xs: "column",
+                sm: "row",
               },
 
               alignItems: {
-                xs: 'flex-start',
-                sm: 'center',
+                xs: "flex-start",
+                sm: "center",
               },
 
               gap: 3,
@@ -220,28 +166,20 @@ export default function ProfilePage() {
               sx={{
                 width: 82,
                 height: 82,
-                bgcolor: 'primary.main',
+                bgcolor: "primary.main",
                 fontSize: 28,
                 fontWeight: 700,
               }}
             >
-              {getInitials(
-                profile.name,
-              )}
+              {getInitials(profile.name)}
             </Avatar>
 
             <Box>
-              <Typography
-                variant="h5"
-                sx={{ fontWeight: 700 }}
-              >
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>
                 {profile.name}
               </Typography>
 
-              <Typography
-                color="text.secondary"
-                sx={{ mt: 0.5 }}
-              >
+              <Typography color="text.secondary" sx={{ mt: 0.5 }}>
                 {profile.email}
               </Typography>
             </Box>
@@ -275,13 +213,9 @@ export default function ProfilePage() {
             <Divider />
 
             <ProfileRow
-              icon={
-                <CalendarMonthOutlined />
-              }
+              icon={<CalendarMonthOutlined />}
               label="Miembro desde"
-              value={formatDate(
-                profile.createdAt,
-              )}
+              value={formatDate(profile.createdAt)}
             />
           </Stack>
         </Paper>
@@ -296,16 +230,12 @@ interface ProfileRowProps {
   value: string;
 }
 
-function ProfileRow({
-  icon,
-  label,
-  value,
-}: ProfileRowProps) {
+function ProfileRow({ icon, label, value }: ProfileRowProps) {
   return (
     <Stack
       direction={{
-        xs: 'column',
-        sm: 'row',
+        xs: "column",
+        sm: "row",
       }}
       spacing={{
         xs: 1,
@@ -314,15 +244,15 @@ function ProfileRow({
       sx={{
         py: 2,
         alignItems: {
-          xs: 'flex-start',
-          sm: 'center',
+          xs: "flex-start",
+          sm: "center",
         },
       }}
     >
       <Box
         sx={{
-          color: 'primary.main',
-          display: 'flex',
+          color: "primary.main",
+          display: "flex",
         }}
       >
         {icon}
@@ -333,10 +263,7 @@ function ProfileRow({
           flexGrow: 1,
         }}
       >
-        <Typography
-          variant="body2"
-          color="text.secondary"
-        >
+        <Typography variant="body2" color="text.secondary">
           {label}
         </Typography>
 
@@ -344,7 +271,7 @@ function ProfileRow({
           sx={{
             mt: 0.25,
             fontWeight: 600,
-            wordBreak: 'break-word',
+            wordBreak: "break-word",
           }}
         >
           {value}

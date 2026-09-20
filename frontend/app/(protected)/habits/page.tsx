@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import axios from "axios";
+
+import { getApiErrorMessage } from "@/services/api-error";
 
 import {
   Alert,
@@ -32,7 +32,7 @@ import {
 
 import { deleteHabit, getHabits, Habit } from "@/services/habits.service";
 
-import { authStorage } from "@/services/auth-storage";
+
 
 function getFrequencyLabel(frequency: string) {
   const values: Record<string, string> = {
@@ -69,7 +69,7 @@ function getPriorityLabel(priority?: string | null) {
 }
 
 export default function HabitsPage() {
-  const router = useRouter();
+  
 
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,20 +91,11 @@ export default function HabitsPage() {
     } catch (error) {
       console.error("Error al cargar hábitos:", error);
 
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        authStorage.removeToken();
-
-        router.replace("/login");
-        return;
-      }
-
       setErrorMessage(
-        "No se pudieron cargar tus hábitos. Inténtalo nuevamente.",
+        getApiErrorMessage(error, "No se pudieron cargar tus hábitos. Inténtalo nuevamente."),
       );
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
+    } 
+  }, []);
   const handleDelete = async () => {
     if (!habitToDelete) {
       return;
@@ -121,44 +112,22 @@ export default function HabitsPage() {
 
     try {
       setDeleting(true);
-      setErrorMessage("");
 
       await deleteHabit(habitId);
 
-      setHabits((currentHabits) =>
-        currentHabits.filter((habit) => (habit.id ?? habit._id) !== habitId),
+      setHabits((current) =>
+        current.filter((habit) => habit.id !== habitToDelete.id),
       );
 
-      setSuccessMessage("Hábito eliminado correctamente");
+      setSuccessMessage("Hábito eliminado correctamente.");
 
       setHabitToDelete(null);
     } catch (error) {
       console.error("Error al eliminar hábito:", error);
 
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          authStorage.removeToken();
-
-          router.replace("/login");
-          return;
-        }
-
-        if (error.response?.status === 404) {
-          setErrorMessage("El hábito ya no existe.");
-
-          setHabitToDelete(null);
-          return;
-        }
-
-        const message = error.response?.data?.message;
-
-        if (typeof message === "string") {
-          setErrorMessage(message);
-          return;
-        }
-      }
-
-      setErrorMessage("No se pudo eliminar el hábito. Inténtalo nuevamente.");
+      setErrorMessage(
+        getApiErrorMessage(error, "No se pudo eliminar el hábito."),
+      );
     } finally {
       setDeleting(false);
     }

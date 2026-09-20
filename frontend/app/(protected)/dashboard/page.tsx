@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+
 
 import {
   Alert,
@@ -36,8 +36,10 @@ import {
   TrendResponse,
   WeeklyProgress,
 } from "@/services/statistics.service";
+import {
+  getApiErrorMessage,
+} from '@/services/api-error';
 
-import { authStorage } from "@/services/auth-storage";
 
 import SummaryCard from "@/components/dashboard/SummaryCard";
 import TodayHabits from "@/components/dashboard/TodayHabits";
@@ -46,7 +48,7 @@ import TrendChart from "@/components/dashboard/TrendChart";
 import StreakCards from "@/components/dashboard/StreakCards";
 
 export default function DashboardPage() {
-  const router = useRouter();
+  
 
   const [summary, setSummary] = useState<SummaryStatistics | null>(null);
 
@@ -90,19 +92,15 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Error al cargar dashboard:", error);
 
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        authStorage.removeToken();
-
-        router.replace("/login");
-
-        return;
-      }
-
-      setErrorMessage("No se pudo cargar la información del dashboard.");
-    } finally {
+       setErrorMessage(
+    getApiErrorMessage(
+      error,
+      'No se pudo cargar la información del dashboard..',
+    ),
+  );} finally {
       setLoading(false);
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {

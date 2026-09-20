@@ -2,9 +2,11 @@
 
 import { useState,useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
 
 
+import {
+  getApiErrorMessage,
+} from '@/services/api-error';
 import {
   Alert,
   Box,
@@ -21,7 +23,6 @@ ToggleButton,
 ToggleButtonGroup,
 } from '@mui/material';
 
-import { authStorage } from '@/services/auth-storage';
 
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,7 +34,6 @@ import {
 
 import {
   createHabit,
-  HabitDay,
   updateHabit,
 } from '@/services/habits.service';
 const DAYS = [
@@ -223,55 +223,26 @@ export default function HabitForm({
       router.push('/habits');
     }, 1000);
   } catch (error) {
-    console.error(
-      mode === 'edit'
-        ? 'Error al actualizar hábito:'
-        : 'Error al crear hábito:',
+  console.error(
+    mode === 'edit'
+      ? 'Error al actualizar hábito:'
+      : 'Error al crear hábito:',
+    error,
+  );
+
+  setErrorMessage(
+    getApiErrorMessage(
       error,
-    );
-
-    if (axios.isAxiosError(error)) {
-      const status =
-        error.response?.status;
-
-      const message =
-        error.response?.data?.message;
-
-      if (status === 401) {
-        authStorage.removeToken();
-
-        router.replace('/login');
-        return;
-      }
-
-      if (status === 404) {
-        setErrorMessage(
-          'El hábito no existe o ya fue eliminado.',
-        );
-        return;
-      }
-
-      if (Array.isArray(message)) {
-        setErrorMessage(
-          message.join(', '),
-        );
-        return;
-      }
-
-      if (
-        typeof message === 'string'
-      ) {
-        setErrorMessage(message);
-        return;
-      }
-    }
-
-    setErrorMessage(
       mode === 'edit'
         ? 'No se pudo actualizar el hábito. Inténtalo nuevamente.'
         : 'No se pudo crear el hábito. Inténtalo nuevamente.',
-    );
-  }
+      {
+        404:
+          'El hábito no existe o ya fue eliminado.',
+      },
+    ),
+  );
+}
 };
 
   return (

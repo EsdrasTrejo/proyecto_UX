@@ -27,6 +27,7 @@ import {
 } from "@/services/habits.service";
 
 import { authStorage } from "@/services/auth-storage";
+import { getApiErrorMessage } from "@/services/api-error";
 
 function getFrequencyLabel(frequency: Habit["frequency"]) {
   const labels = {
@@ -51,9 +52,7 @@ interface TodayHabitsProps {
   onStatusChange?: () => void;
 }
 
-export default function TodayHabits({
-  onStatusChange,
-}: TodayHabitsProps) {
+export default function TodayHabits({ onStatusChange }: TodayHabitsProps) {
   const router = useRouter();
 
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -74,19 +73,11 @@ export default function TodayHabits({
     } catch (error) {
       console.error("Error al cargar hábitos de hoy:", error);
 
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        authStorage.removeToken();
+      
 
-        router.replace("/login");
-
-        return;
-      }
-
-      setErrorMessage("No se pudieron cargar los hábitos de hoy.");
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
+      setErrorMessage(getApiErrorMessage(error, "No se pudieron cargar los hábitos de hoy."));
+    } 
+  }, []);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -132,53 +123,17 @@ export default function TodayHabits({
     } catch (error) {
       console.error("Error al actualizar hábito:", error);
 
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-
-        const message = error.response?.data?.message;
-
-        if (status === 401) {
-          authStorage.removeToken();
-
-          router.replace("/login");
-
-          return;
-        }
-
-        if (typeof message === "string") {
-          setErrorMessage(message);
-          return;
-        }
-
-        if (Array.isArray(message)) {
-          setErrorMessage(message.join(", "));
-          return;
-        }
-      }
-
-      setErrorMessage("No se pudo actualizar el estado del hábito.");
+      setErrorMessage(
+        getApiErrorMessage(
+          error,
+          "No se pudo actualizar el estado del hábito.",
+        ),
+      );
     } finally {
       setUpdatingHabitId(null);
     }
   };
 
-  const completedCount =
-  habits.filter(
-    (habit) =>
-      habit.completedToday,
-  ).length;
-
-const pendingCount =
-  habits.length - completedCount;
-
-const completionPercentage =
-  habits.length === 0
-    ? 0
-    : Math.round(
-        (completedCount /
-          habits.length) *
-          100,
-      );
 
   return (
     <Paper
@@ -237,9 +192,7 @@ const completionPercentage =
             }}
           >
             Estos son los hábitos que te corresponden hoy.
-            
           </Typography>
-          
         </Box>
 
         <Button component={Link} href="/habits/new" startIcon={<Add />}>

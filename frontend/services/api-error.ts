@@ -6,18 +6,37 @@ interface ApiErrorResponse {
   statusCode?: number;
 }
 
+type StatusMessages = Partial<
+  Record<number, string>
+>;
+
 export function getApiErrorMessage(
   error: unknown,
   fallbackMessage =
     'Ocurrió un error inesperado.',
+  statusMessages: StatusMessages = {},
 ): string {
   if (!axios.isAxiosError(error)) {
     return fallbackMessage;
   }
 
+  const status =
+    error.response?.status;
+
+  /*
+   * Primero usamos un mensaje personalizado
+   * si el componente lo necesita.
+   */
+  if (
+    status &&
+    statusMessages[status]
+  ) {
+    return statusMessages[status]!;
+  }
+
   const data =
-    error.response
-      ?.data as ApiErrorResponse
+    error.response?.data as
+      | ApiErrorResponse
       | undefined;
 
   if (
@@ -27,15 +46,12 @@ export function getApiErrorMessage(
   }
 
   if (
-    typeof data?.message ===
-    'string'
+    typeof data?.message === 'string'
   ) {
     return data.message;
   }
 
-  switch (
-    error.response?.status
-  ) {
+  switch (status) {
     case 400:
       return 'Los datos enviados no son válidos.';
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+
 
 import {
   Alert,
@@ -17,7 +17,9 @@ import {
 } from "@mui/material";
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-
+import {
+  getApiErrorMessage,
+} from '@/services/api-error';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -58,35 +60,22 @@ export default function LoginForm() {
       authStorage.setToken(result.access_token);
 
       router.push("/dashboard");
-    } catch (error) {
-      console.error("Error al iniciar sesión:", error);
+    }  catch (error) {
+  console.error(
+    'Error al iniciar sesión:',
+    error,
+  );
 
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message;
-
-        if (status === 401) {
-          setErrorMessage("Correo electrónico o contraseña incorrectos.");
-          return;
-        }
-
-        if (Array.isArray(message)) {
-          setErrorMessage(message.join(", "));
-          return;
-        }
-
-        if (typeof message === "string") {
-          setErrorMessage(message);
-          return;
-        }
-
-        setErrorMessage("No se pudo iniciar sesión. Inténtalo nuevamente.");
-
-        return;
-      }
-
-      setErrorMessage("Ocurrió un error inesperado. Inténtalo nuevamente.");
-    }
+  setErrorMessage(
+    getApiErrorMessage(
+      error,
+      'No se pudo iniciar sesión. Inténtalo nuevamente.',
+      {
+        401: 'Correo electrónico o contraseña incorrectos.',
+      },
+    ),
+  );
+}
   };
 
   return (
