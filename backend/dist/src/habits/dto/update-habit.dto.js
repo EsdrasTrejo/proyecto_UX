@@ -103,7 +103,7 @@ __decorate([
     }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], UpdateHabitDto.prototype, "endDate", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({

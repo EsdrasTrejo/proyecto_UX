@@ -8,6 +8,6 @@ export declare class UpdateHabitDto {
     customDays?: HabitDay[];
     priority?: HabitPriority;
     startDate?: string;
-    endDate?: string;
+    endDate?: string | null;
     active?: boolean;
 }

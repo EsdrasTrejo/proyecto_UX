@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import axios from "axios";
+
 
 import {
   Alert,
@@ -26,7 +25,7 @@ import {
   markHabitToday,
 } from "@/services/habits.service";
 
-import { authStorage } from "@/services/auth-storage";
+
 import { getApiErrorMessage } from "@/services/api-error";
 
 function getFrequencyLabel(frequency: Habit["frequency"]) {
@@ -53,7 +52,7 @@ interface TodayHabitsProps {
 }
 
 export default function TodayHabits({ onStatusChange }: TodayHabitsProps) {
-  const router = useRouter();
+  
 
   const [habits, setHabits] = useState<Habit[]>([]);
 
@@ -62,21 +61,31 @@ export default function TodayHabits({ onStatusChange }: TodayHabitsProps) {
   const [errorMessage, setErrorMessage] = useState("");
   const [updatingHabitId, setUpdatingHabitId] = useState<string | null>(null);
 
-  const loadTodayHabits = useCallback(async () => {
+ const loadTodayHabits =
+  useCallback(async () => {
     try {
       setLoading(true);
-      setErrorMessage("");
+      setErrorMessage('');
 
-      const data = await getTodayHabits();
+      const data =
+        await getTodayHabits();
 
       setHabits(data);
     } catch (error) {
-      console.error("Error al cargar hábitos de hoy:", error);
+      console.error(
+        'Error al cargar hábitos de hoy:',
+        error,
+      );
 
-      
-
-      setErrorMessage(getApiErrorMessage(error, "No se pudieron cargar los hábitos de hoy."));
-    } 
+      setErrorMessage(
+        getApiErrorMessage(
+          error,
+          'No se pudieron cargar los hábitos de hoy.',
+        ),
+      );
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {

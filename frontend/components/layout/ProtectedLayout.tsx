@@ -27,6 +27,7 @@ import {
   Logout,
   Menu,
   TaskAltOutlined,
+  CalendarMonthOutlined,
 } from "@mui/icons-material";
 
 const drawerWidth = 240;
@@ -56,6 +57,11 @@ const navigationItems = [
     label: "Perfil",
     href: "/profile",
     icon: <AccountCircleOutlined />,
+  },
+  {
+    label: "Calendario",
+    href: "/calender",
+    icon: <CalendarMonthOutlined />,
   },
 ];
 

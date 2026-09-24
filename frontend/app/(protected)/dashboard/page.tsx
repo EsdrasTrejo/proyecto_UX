@@ -62,13 +62,30 @@ export default function DashboardPage() {
 
   const [errorMessage, setErrorMessage] = useState("");
 
-  const refreshSummary = useCallback(async () => {
+  const refreshDashboard =
+  useCallback(async () => {
     try {
-      const data = await getSummary();
+      const [
+        summaryData,
+        weeklyData,
+        trendData,
+        streaksData,
+      ] = await Promise.all([
+        getSummary(),
+        getWeeklyProgress(),
+        getTrend(),
+        getStreaks(),
+      ]);
 
-      setSummary(data);
+      setSummary(summaryData);
+      setWeekly(weeklyData);
+      setTrend(trendData);
+      setStreaks(streaksData);
     } catch (error) {
-      console.error("Error actualizando resumen:", error);
+      console.error(
+        'Error actualizando dashboard:',
+        error,
+      );
     }
   }, []);
 
@@ -238,7 +255,7 @@ export default function DashboardPage() {
       )}
 
       <Box sx={{ mb: 4 }}>
-        <TodayHabits onStatusChange={refreshSummary} />
+        <TodayHabits onStatusChange={refreshDashboard} />
       </Box>
 
       <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>

@@ -103,6 +103,6 @@ __decorate([
     }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], CreateHabitDto.prototype, "endDate", void 0);
 //# sourceMappingURL=create-habit.dto.js.map

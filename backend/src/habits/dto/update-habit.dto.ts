@@ -82,7 +82,7 @@ export class UpdateHabitDto {
   })
   @IsOptional()
   @IsDateString()
-  endDate?: string;
+  endDate?: string | null;
 
   @ApiPropertyOptional({
     example: true,

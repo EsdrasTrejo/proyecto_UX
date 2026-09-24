@@ -37,15 +37,10 @@ export class StatisticsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getSummary(userId: string) {
-    const now = new Date();
+    const today = getToday();
 
-    const today = new Date(
-      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
-    );
+    const todayDay = getHabitDay(today);
 
-    const todayDay = getHabitDay(now);
-
-    // Total de hábitos del usuario
     const totalHabits = await this.prisma.habit.count({
       where: {
         userId,
@@ -62,7 +57,6 @@ export class StatisticsService {
       },
     });
 
-    // Hábitos activos
     const activeHabits = await this.prisma.habit.count({
       where: {
         userId,
@@ -85,7 +79,6 @@ export class StatisticsService {
       },
     });
 
-    // Hábitos que corresponden HOY
     const todayHabits = await this.prisma.habit.findMany({
       where: {
         userId,

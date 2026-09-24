@@ -8,5 +8,5 @@ export declare class CreateHabitDto {
     customDays?: HabitDay[];
     priority: HabitPriority;
     startDate: string;
-    endDate?: string;
+    endDate?: string | null;
 }

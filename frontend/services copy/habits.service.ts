@@ -19,7 +19,6 @@ export type HabitDay =
   | 'SATURDAY'
   | 'SUNDAY';
 
-
 export interface Habit {
   id?: string;
   _id?: string;
@@ -39,8 +38,6 @@ export interface Habit {
   endDate?: string | null;
 
   active: boolean;
-
-  completedToday?: boolean;
 }
 
 export interface CreateHabitData {
@@ -56,7 +53,7 @@ export interface CreateHabitData {
   priority: HabitPriority;
 
   startDate: string;
-  endDate?: string | null;
+  endDate?: string;
 }
 
 export type UpdateHabitData =
@@ -66,26 +63,6 @@ export const getHabits =
   async (): Promise<Habit[]> => {
     const response =
       await api.get<Habit[]>('/habits');
-
-    return response.data;
-  };
-
-  export const markHabitToday = async (
-  id: string,
-  completed: boolean,
-): Promise<void> => {
-  await api.put(
-    `/habits/${id}/records/today`,
-    {
-      completed,
-    },
-  );
-};
-
-  export const getTodayHabits =
-  async (): Promise<Habit[]> => {
-    const response =
-      await api.get<Habit[]>('/habits/today');
 
     return response.data;
   };
@@ -110,43 +87,21 @@ export const createHabit = async (
   return response.data;
 };
 
-export const updateHabit =
-  async (
-    id: string,
-    data: UpdateHabitData,
-  ) => {
-    const response =
-      await api.patch(
-        `/habits/${id}`,
-        data,
-      );
+export const updateHabit = async (
+  id: string,
+  data: UpdateHabitData,
+): Promise<Habit> => {
+  const response =
+    await api.patch<Habit>(
+      `/habits/${id}`,
+      data,
+    );
 
-    return response.data;
-  };
+  return response.data;
+};
 
 export const deleteHabit = async (
   id: string,
 ): Promise<void> => {
   await api.delete(`/habits/${id}`);
-};
-
-export interface HabitRecord {
-  id: string;
-  date: string;
-  completed: boolean;
-  habitId: string;
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export const getHabitRecords = async (
-  id: string,
-): Promise<HabitRecord[]> => {
-  const response =
-    await api.get<HabitRecord[]>(
-      `/habits/${id}/records`,
-    );
-
-  return response.data;
 };

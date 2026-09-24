@@ -104,6 +104,7 @@ export default function EditHabitPage() {
     if (id) {
       loadHabit();
     }
+    
   }, [id, router]);
 
   if (loading) {

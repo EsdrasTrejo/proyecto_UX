@@ -19,7 +19,7 @@ export class HabitsService {
 
     const endDate = createHabitDto.endDate
       ? new Date(createHabitDto.endDate)
-      : undefined;
+      : null;
 
     if (endDate && endDate < startDate) {
       throw new BadRequestException(
@@ -193,13 +193,24 @@ export class HabitsService {
   async update(id: string, userId: string, updateHabitDto: UpdateHabitDto) {
     const habit = await this.findOne(id, userId);
 
-    const startDate = updateHabitDto.startDate
-      ? new Date(updateHabitDto.startDate)
-      : habit.startDate;
+    const startDate =
+      updateHabitDto.startDate !== undefined
+        ? new Date(updateHabitDto.startDate)
+        : habit.startDate;
 
-    const endDate = updateHabitDto.endDate
-      ? new Date(updateHabitDto.endDate)
-      : habit.endDate;
+    let endDate: Date | null | undefined;
+
+    if (updateHabitDto.endDate === undefined) {
+      // No se modificó la fecha final
+      endDate = habit.endDate ?? null;
+    } else if (updateHabitDto.endDate === null) {
+      // El usuario quitó la fecha final
+      endDate = null;
+    } else {
+      // El usuario agregó o cambió
+      // la fecha final
+      endDate = new Date(updateHabitDto.endDate);
+    }
 
     if (endDate && endDate < startDate) {
       throw new BadRequestException(
@@ -222,19 +233,23 @@ export class HabitsService {
 
       data: {
         name: updateHabitDto.name,
+
         description: updateHabitDto.description,
+
         category: updateHabitDto.category,
 
         frequency,
 
         weeklyDay: schedule.weeklyDay,
+
         customDays: schedule.customDays,
 
         priority: updateHabitDto.priority,
 
-        startDate: updateHabitDto.startDate ? startDate : undefined,
+        startDate:
+          updateHabitDto.startDate !== undefined ? startDate : undefined,
 
-        endDate: updateHabitDto.endDate ? endDate : undefined,
+        endDate: updateHabitDto.endDate !== undefined ? endDate : undefined,
 
         active: updateHabitDto.active,
       },

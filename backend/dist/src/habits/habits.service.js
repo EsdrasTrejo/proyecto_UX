@@ -23,7 +23,7 @@ let HabitsService = class HabitsService {
         const startDate = new Date(createHabitDto.startDate);
         const endDate = createHabitDto.endDate
             ? new Date(createHabitDto.endDate)
-            : undefined;
+            : null;
         if (endDate && endDate < startDate) {
             throw new common_1.BadRequestException('La fecha de fin no puede ser anterior a la fecha de inicio');
         }
@@ -139,12 +139,19 @@ let HabitsService = class HabitsService {
     }
     async update(id, userId, updateHabitDto) {
         const habit = await this.findOne(id, userId);
-        const startDate = updateHabitDto.startDate
+        const startDate = updateHabitDto.startDate !== undefined
             ? new Date(updateHabitDto.startDate)
             : habit.startDate;
-        const endDate = updateHabitDto.endDate
-            ? new Date(updateHabitDto.endDate)
-            : habit.endDate;
+        let endDate;
+        if (updateHabitDto.endDate === undefined) {
+            endDate = habit.endDate ?? null;
+        }
+        else if (updateHabitDto.endDate === null) {
+            endDate = null;
+        }
+        else {
+            endDate = new Date(updateHabitDto.endDate);
+        }
         if (endDate && endDate < startDate) {
             throw new common_1.BadRequestException('La fecha de fin no puede ser anterior a la fecha de inicio');
         }
@@ -164,8 +171,8 @@ let HabitsService = class HabitsService {
                 weeklyDay: schedule.weeklyDay,
                 customDays: schedule.customDays,
                 priority: updateHabitDto.priority,
-                startDate: updateHabitDto.startDate ? startDate : undefined,
-                endDate: updateHabitDto.endDate ? endDate : undefined,
+                startDate: updateHabitDto.startDate !== undefined ? startDate : undefined,
+                endDate: updateHabitDto.endDate !== undefined ? endDate : undefined,
                 active: updateHabitDto.active,
             },
         });

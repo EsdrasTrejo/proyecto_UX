@@ -76,7 +76,9 @@ export default function StatisticsPage() {
       setErrorMessage(
         getApiErrorMessage(error, "No se pudieron cargar las estadísticas."),
       );
-    } 
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {

@@ -94,7 +94,9 @@ export default function HabitsPage() {
       setErrorMessage(
         getApiErrorMessage(error, "No se pudieron cargar tus hábitos. Inténtalo nuevamente."),
       );
-    } 
+    } finally {
+      setLoading(false);
+    }
   }, []);
   const handleDelete = async () => {
     if (!habitToDelete) {

@@ -82,5 +82,5 @@ export class CreateHabitDto {
   })
   @IsOptional()
   @IsDateString()
-  endDate?: string;
+  endDate?: string | null;
 }

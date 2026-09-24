@@ -20,9 +20,8 @@ let StatisticsService = class StatisticsService {
         this.prisma = prisma;
     }
     async getSummary(userId) {
-        const now = new Date();
-        const today = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-        const todayDay = (0, date_utils_1.getHabitDay)(now);
+        const today = (0, date_utils_1.getToday)();
+        const todayDay = (0, date_utils_1.getHabitDay)(today);
         const totalHabits = await this.prisma.habit.count({
             where: {
                 userId,
